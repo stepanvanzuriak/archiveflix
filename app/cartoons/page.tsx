@@ -2,7 +2,7 @@ import { getItem, getItems } from "@/service/api";
 import NextPage from "@/components/next-page";
 import VideosList from "@/components/videos-list";
 
-export default async function Home({
+export default async function Cartoons({
   searchParams,
 }: {
   searchParams: { page: string };
@@ -12,15 +12,10 @@ export default async function Home({
 
   const data = await getItems(
     {
-      collection: "feature_films",
+      collection: "animationandcartoons",
     },
     Number(currentPage),
   );
-
-  // GET VIDEO
-  // const data2 = await getItemTest();
-  // const testFile = data2.files.filter(({ format }) => format === "h.264")[0]
-  //   .name;
 
   const movies = await Promise.all(
     data.response.docs.map(({ identifier }) => getItem(identifier as string)),
@@ -30,10 +25,6 @@ export default async function Home({
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <VideosList movies={movies} />
       <NextPage />
-      {/* <video
-        controls
-        src={`https://archive.org/download/dragon-ball-z-level-set-collection/${testFile}`}
-      /> */}
     </section>
   );
 }
