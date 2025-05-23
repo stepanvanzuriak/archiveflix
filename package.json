@@ -6,10 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint --fix"
+    "lint": "eslint --fix",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@heroui/button": "2.2.19",
+    "@heroui/card": "^2.2.18",
     "@heroui/code": "2.2.14",
     "@heroui/input": "2.4.19",
     "@heroui/kbd": "2.2.15",
@@ -24,9 +26,11 @@
     "@react-aria/visually-hidden": "3.8.22",
     "clsx": "2.1.1",
     "framer-motion": "11.13.1",
+    "internetarchive-sdk-js": "^1.0.38",
     "intl-messageformat": "10.7.16",
     "next": "15.3.1",
     "next-themes": "0.4.6",
+    "patch-package": "^8.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
