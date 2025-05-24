@@ -26,7 +26,7 @@ const FilesList = ({
       </TableHeader>
       <TableBody>
         {files.map((file) => (
-          <TableRow key={file.sha1}>
+          <TableRow key={file.name}>
             <TableCell>{file.name}</TableCell>
             <TableCell>{file.format}</TableCell>
             <TableCell>
