@@ -11,7 +11,7 @@ index d9f9575..fd473b5 100644
                      headers,
                      method: endpoint.method,
 diff --git a/node_modules/internetarchive-sdk-js/dist/index.cjs b/node_modules/internetarchive-sdk-js/dist/index.cjs
-index ed62429..150de00 100644
+index ed62429..e453c0d 100644
 --- a/node_modules/internetarchive-sdk-js/dist/index.cjs
 +++ b/node_modules/internetarchive-sdk-js/dist/index.cjs
 @@ -330,33 +330,42 @@ class InternetArchive {
@@ -19,11 +19,11 @@ index ed62429..150de00 100644
      async getItems(items) {
          const { filters, options } = items;
 -        const { fields, rows } = options || {};
-+        const { fields, rows, page } = options || {};
++        const { fields, rows, page, sort } = options || {};
 +        const limit = Number(rows) || 50;
 +        const currentPage = Number(page) || 1;
-+     
-+    
++
++
          const params = {
              'q': filters?.collection && filters?.subject && filters?.creator
 -                ? `collection:(${filters?.collection})&subject:("${filters?.subject}")&creator:("${filters?.creator}")`
@@ -51,23 +51,24 @@ index ed62429..150de00 100644
 +            'rows': limit,
 +            'page': currentPage,
              'output': 'json',
-             'sort[]': 'date desc',
+-            'sort[]': 'date desc',
++            'sort[]': sort || 'date desc',
          };
-+    
++
          if (!params.q) {
 -            throw new Error('collection, subject, or creator required');
 +            throw new Error('At least one of collection, subject, or creator is required');
          }
-+    
++
          return await this.httpClient.makeRequest(endpoints.getItems, { params });
      }
-+    
-+     
++
++
      /**
       * Returns an Item by identifier.
       *
 diff --git a/node_modules/internetarchive-sdk-js/dist/index.js b/node_modules/internetarchive-sdk-js/dist/index.js
-index 17db2df..edc5339 100644
+index 17db2df..82583ac 100644
 --- a/node_modules/internetarchive-sdk-js/dist/index.js
 +++ b/node_modules/internetarchive-sdk-js/dist/index.js
 @@ -88,31 +88,38 @@ class InternetArchive {
@@ -75,11 +76,11 @@ index 17db2df..edc5339 100644
      async getItems(items) {
          const { filters, options } = items;
 -        const { fields, rows } = options || {};
-+        const { fields, rows, page } = options || {};
++        const { fields, rows, page, sort } = options || {};
 +        const limit = Number(rows) || 50;
 +        const currentPage = Number(page) || 1;
-+     
-+    
++
++
          const params = {
              'q': filters?.collection && filters?.subject && filters?.creator
 -                ? `collection:(${filters?.collection})&subject:("${filters?.subject}")&creator:("${filters?.creator}")`
@@ -107,14 +108,15 @@ index 17db2df..edc5339 100644
 +            'rows': limit,
 +            'page': currentPage,
              'output': 'json',
-             'sort[]': 'date desc',
+-            'sort[]': 'date desc',
++            'sort[]': sort || 'date desc',
          };
-+    
++
          if (!params.q) {
 -            throw new Error('collection, subject, or creator required');
 +            throw new Error('At least one of collection, subject, or creator is required');
          }
-+     
++
          return await this.httpClient.makeRequest(endpoints.getItems, { params });
      }
      /**

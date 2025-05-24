@@ -11,11 +11,14 @@ export const getItems = async (
     creator?: string;
   },
   page: number = 1,
+  opts: { sort?: string } = {},
 ) => {
   const options = {
     rows: "12",
     fields: "identifier",
     page,
+    sort: "num_reviews desc",
+    ...opts,
   };
 
   return ia.getItems({ filters, options });

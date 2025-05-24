@@ -12,6 +12,10 @@ export const siteConfig = {
       label: "Cartoons",
       href: "/cartoons",
     },
+    {
+      label: "Arts & Music",
+      href: "/artsandmusic",
+    },
   ],
   navMenuItems: [
     // {

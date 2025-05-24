@@ -1,39 +1,28 @@
-import { getItem, getItems } from "@/service/api";
+import { Suspense } from "react";
+
 import NextPage from "@/components/next-page";
-import VideosList from "@/components/videos-list";
+import ListControls from "@/components/list-controls";
+import Videos from "@/components/videos";
+import Loading from "@/components/loading";
 
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { page: string };
+  searchParams: Promise<{ page: string; sort: string }>;
 }) {
   const params = await searchParams;
   const currentPage = params.page || "1";
-
-  const data = await getItems(
-    {
-      collection: "feature_films",
-    },
-    Number(currentPage),
-  );
-
-  // GET VIDEO
-  // const data2 = await getItemTest();
-  // const testFile = data2.files.filter(({ format }) => format === "h.264")[0]
-  //   .name;
-
-  const movies = await Promise.all(
-    data.response.docs.map(({ identifier }) => getItem(identifier as string)),
-  );
+  const currentSort = params.sort || "num_reviews desc";
 
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <VideosList movies={movies} />
+    <section className="h-full flex flex-col gap-4">
+      <ListControls />
+
+      <Suspense fallback={<Loading className="flex-grow" />}>
+        <Videos currentPage={currentPage} currentSort={currentSort} />
+      </Suspense>
+
       <NextPage />
-      {/* <video
-        controls
-        src={`https://archive.org/download/dragon-ball-z-level-set-collection/${testFile}`}
-      /> */}
     </section>
   );
 }
