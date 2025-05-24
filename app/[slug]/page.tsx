@@ -58,6 +58,7 @@ export default async function MoviePage({
   return (
     <div>
       <div className="mb-10 h-[500px] flex items-center justify-center">
+        {/* eslint-disable-next-line */}
         <video controls preload="auto" className="h-[450px]">
           <source
             src={`https://archive.org/download/${slug}/${video}`}

@@ -5,7 +5,7 @@ import VideosList from "@/components/videos-list";
 export default async function ArtsAndMusic({
   searchParams,
 }: {
-  searchParams: { page: string };
+  searchParams: Promise<{ page: string }>;
 }) {
   const params = await searchParams;
   const currentPage = params.page || "1";
