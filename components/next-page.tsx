@@ -21,7 +21,7 @@ function NextPage() {
     <div className="flex gap-5">
       {currentPage - 1 > 0 && (
         <Link href={createPageURL(currentPage - 1)}>
-          <Button color="primary">Previous </Button>
+          <Button color="primary">Previous</Button>
         </Link>
       )}
       <Link href={createPageURL(currentPage + 1)}>

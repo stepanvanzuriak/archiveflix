@@ -1,20 +1,35 @@
 diff --git a/node_modules/internetarchive-sdk-js/dist/HttpClient.js b/node_modules/internetarchive-sdk-js/dist/HttpClient.js
-index d9f9575..fd473b5 100644
+index d9f9575..fb896be 100644
 --- a/node_modules/internetarchive-sdk-js/dist/HttpClient.js
 +++ b/node_modules/internetarchive-sdk-js/dist/HttpClient.js
-@@ -53,6 +53,7 @@ class HttpClient {
+@@ -53,11 +53,13 @@ class HttpClient {
                          }
                      }
                  }
-+             
++
                  const response = await fetch(apiUrl, {
                      headers,
                      method: endpoint.method,
+                     ...(body && { body: JSON.stringify(body) }),
+                     ...(data && { body: endpoint.schema.type === 'qs' ? qs.stringify(data) : data }),
++                    next: { revalidate: 3600 }
+                 });
+                 if (!response.ok) {
+                     const message = response.status === 403 ? 'archive.org token is incorrect or you do not have access to this collection.' : endpoint?.emptyBody ? response.statusText : JSON.parse(await response.text())?.error ?? response.statusText;
 diff --git a/node_modules/internetarchive-sdk-js/dist/index.cjs b/node_modules/internetarchive-sdk-js/dist/index.cjs
-index ed62429..e453c0d 100644
+index ed62429..c8d44f5 100644
 --- a/node_modules/internetarchive-sdk-js/dist/index.cjs
 +++ b/node_modules/internetarchive-sdk-js/dist/index.cjs
-@@ -330,33 +330,42 @@ class InternetArchive {
+@@ -149,6 +149,8 @@ class HttpClient {
+                     method: endpoint.method,
+                     ...(body && { body: JSON.stringify(body) }),
+                     ...(data && { body: endpoint.schema.type === 'qs' ? qs.stringify(data) : data }),
++                    next: { revalidate: 3600 }
++
+                 });
+                 if (!response.ok) {
+                     const message = response.status === 403 ? 'archive.org token is incorrect or you do not have access to this collection.' : endpoint?.emptyBody ? response.statusText : JSON.parse(await response.text())?.error ?? response.statusText;
+@@ -330,33 +332,42 @@ class InternetArchive {
       */
      async getItems(items) {
          const { filters, options } = items;

@@ -5,13 +5,15 @@ import { getItem, getItems } from "@/service/api";
 const Videos = async ({
   currentPage,
   currentSort,
+  collection,
 }: {
   currentPage: string;
   currentSort: string;
+  collection: string;
 }) => {
   const data = await getItems(
     {
-      collection: "feature_films",
+      collection,
     },
     Number(currentPage),
     {

@@ -19,7 +19,11 @@ export default async function Home({
       <ListControls />
 
       <Suspense fallback={<Loading className="flex-grow" />}>
-        <Videos currentPage={currentPage} currentSort={currentSort} />
+        <Videos
+          collection="feature_films"
+          currentPage={currentPage}
+          currentSort={currentSort}
+        />
       </Suspense>
 
       <NextPage />
