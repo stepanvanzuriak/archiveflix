@@ -1,6 +1,6 @@
 import { Chip } from "@heroui/chip";
 
-import { getItem } from "@/service/api";
+import { fetcher, getItem } from "@/service/api";
 import Player from "@/components/player";
 import Details from "@/components/details";
 
@@ -45,7 +45,7 @@ export default async function MoviePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const item = await getItem(slug);
+  const item = await fetcher(getItem(slug));
   const { title, description, collection } = item.metadata;
 
   return (

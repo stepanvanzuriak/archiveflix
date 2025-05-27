@@ -236,10 +236,7 @@ const config = {
           },
         },
       },
-      layout: {
-        radius: "0",
-        disabledOpacity: "0.5",
-      },
+      layout: {},
     }),
   ],
 };

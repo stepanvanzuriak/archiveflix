@@ -12,6 +12,8 @@ import { usePathname } from "next/navigation";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { Button } from "@heroui/button";
+import Link from "next/link";
 
 // const MainIcon = () => (
 //   <svg
@@ -59,10 +61,10 @@ export const Navbar = () => {
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink
-            className="flex justify-start items-center gap-1 p-1 border-1 border-foreground text-foreground"
+            className="flex justify-start items-center text-foreground"
             href="/"
           >
-            <p>ArchiveFlix</p>
+            <Button variant="bordered">ArchiveFlix</Button>
           </NextLink>
         </NavbarBrand>
         <ul className="hidden lg:flex gap-4 justify-start ml-2">
@@ -82,6 +84,9 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
+        <Link href="/profile">
+          <Button>Profile</Button>
+        </Link>
         <NavbarItem className="hidden sm:flex gap-2">
           <ThemeSwitch />
         </NavbarItem>
@@ -89,6 +94,9 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
+        <Link href="/profile">
+          <Button>Profile</Button>
+        </Link>
         <ThemeSwitch />
         <NavbarMenuToggle />
       </NavbarContent>

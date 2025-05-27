@@ -148,8 +148,8 @@ const FilesList = ({
           />
         </div>
       }
+      removeWrapper
       isCompact
-      className="border-secondary border-1"
       aria-label="Example static collection table"
     >
       <TableHeader>
