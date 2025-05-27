@@ -50,7 +50,7 @@ export default async function MoviePage({
 
   return (
     <div>
-      <Player item={item} slug={slug} />
+      <Player slug={slug} />
       <h1 className="text-2xl text-primary mb-4">{title as string}</h1>
       <div className="mb-4">
         {(collection as string[])
