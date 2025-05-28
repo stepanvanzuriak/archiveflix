@@ -18,10 +18,18 @@ export const siteConfig = {
     },
   ],
   navMenuItems: [
-    // {
-    //   label: "Profile",
-    //   href: "/profile",
-    // },
+    {
+      label: "Features",
+      href: "/",
+    },
+    {
+      label: "Cartoons",
+      href: "/cartoons",
+    },
+    {
+      label: "Arts & Music",
+      href: "/artsandmusic",
+    },
     // {
     //   label: "Dashboard",
     //   href: "/dashboard",
