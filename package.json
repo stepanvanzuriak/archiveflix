@@ -29,6 +29,7 @@
     "@heroui/table": "^2.2.18",
     "@heroui/tabs": "^2.2.16",
     "@heroui/theme": "2.4.15",
+    "@piotr-cz/swr-idb-cache": "^1.1.2",
     "@react-aria/ssr": "3.9.8",
     "@react-aria/visually-hidden": "3.8.22",
     "clsx": "2.1.1",

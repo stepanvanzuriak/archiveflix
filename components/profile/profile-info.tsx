@@ -8,17 +8,16 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
+import { Button } from "@heroui/button";
 
 import { useUserStore } from "@/stores/user-store-provider";
 
 const UserProfile = () => {
-  const name = useUserStore((store) => store.name);
   const filter = useUserStore((store) => store.filter);
+  const removeFilter = useUserStore((store) => store.removeFromFilter);
 
   return (
     <div>
-      <h1 className="text-3xl mb-4">{name}</h1>
-
       <h2 className="text-2xl mb-4">Not interested</h2>
       <Table aria-label="Example static collection table">
         <TableHeader>
@@ -29,7 +28,9 @@ const UserProfile = () => {
           {filter.map((id) => (
             <TableRow key={id}>
               <TableCell>{id}</TableCell>
-              <TableCell>Active</TableCell>
+              <TableCell>
+                <Button onPress={() => removeFilter(id)}>Remove</Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

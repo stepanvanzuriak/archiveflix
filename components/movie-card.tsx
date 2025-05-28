@@ -1,4 +1,3 @@
-import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import {
   Dropdown,
@@ -7,10 +6,6 @@ import {
   DropdownTrigger,
 } from "@heroui/dropdown";
 import Image from "next/image";
-import useSWR from "swr";
-
-import { fetcher, getItem } from "@/service/api";
-import { Skeleton } from "@heroui/skeleton";
 
 const MovieCard = ({
   movie,
@@ -49,15 +44,15 @@ const MovieCard = ({
     >
       <Card className="bg-transparent text-primary border-secondary border-2 cursor-pointer">
         <CardHeader className="pb-0 flex-col items-start">
-          <div className="flex items-center w-full">
+          <div className="flex w-full">
             <h4
-              className="text-medium uppercase font-bold truncate grow"
+              className="text-medium uppercase font-bold truncate grow text-left"
               title={title}
             >
               {title}
             </h4>
             <Dropdown>
-              <DropdownTrigger className="text-primary">
+              <DropdownTrigger className="text-primary min-w-[24px]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -86,7 +81,7 @@ const MovieCard = ({
           </div>
 
           <small
-            className="text-default-500 w-full truncate"
+            className="text-default-500 w-full truncate text-left"
             title={formatedDescription}
           >
             {formatedDescription}
@@ -98,7 +93,7 @@ const MovieCard = ({
               fill
               priority
               alt={thumbnail.name as string}
-              className="max-w-64 max-h-40 m-auto"
+              className="max-w-64 max-h-40 m-auto grayscale-50"
               sizes="(max-width: 256px) (max-height: 160px)"
               src={`https://archive.org/download/${movie.metadata.identifier as string}/${thumbnail.name as string}`}
             />

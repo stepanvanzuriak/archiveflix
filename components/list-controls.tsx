@@ -45,12 +45,55 @@ const ArrowUp = () => {
 const SORT_ORDERS = {
   num_reviews_desc: "num_reviews desc",
   num_reviews_asc: "num_reviews asc",
+  avg_rating_desc: "avg_rating desc",
+  avg_rating_asc: "avg_rating asc",
+};
+
+const Control = ({
+  createSortPageURL,
+  currentSort,
+  ascState,
+  descState,
+  name,
+}: {
+  name: string;
+  ascState: string;
+  descState: string;
+  currentSort: string;
+  createSortPageURL: (url: string) => string;
+}) => {
+  if (currentSort !== ascState && currentSort !== descState) {
+    return (
+      <Link href={createSortPageURL(ascState)}>
+        <Button
+          color="primary"
+          className="bg-transparent border-primary border-2 text-primary"
+        >
+          {name}
+        </Button>
+      </Link>
+    );
+  }
+
+  const nextSort = currentSort === ascState ? descState : ascState;
+
+  return (
+    <Link href={createSortPageURL(nextSort)}>
+      <Button
+        color="primary"
+        className="bg-transparent border-primary border-2 text-primary"
+      >
+        {name} {currentSort === ascState ? <ArrowUp /> : <ArrowDown />}
+      </Button>
+    </Link>
+  );
 };
 
 const ListControls = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentSort = searchParams.get("sort") as string;
+  const currentSort =
+    (searchParams.get("sort") as string) || "num_reviews desc";
 
   const createSortPageURL = (sortOrder: string) => {
     const params = new URLSearchParams(searchParams);
@@ -60,26 +103,22 @@ const ListControls = () => {
     return `${pathname}?${params.toString()}`;
   };
 
-  const nextSort =
-    currentSort === SORT_ORDERS.num_reviews_asc
-      ? SORT_ORDERS.num_reviews_desc
-      : SORT_ORDERS.num_reviews_asc;
-
   return (
     <div className="flex gap-2">
-      <Link href={createSortPageURL(nextSort)}>
-        <Button
-          color="primary"
-          className="bg-transparent border-primary border-2 text-primary"
-        >
-          Number of reviews{" "}
-          {currentSort === SORT_ORDERS.num_reviews_asc ? (
-            <ArrowUp />
-          ) : (
-            <ArrowDown />
-          )}
-        </Button>
-      </Link>
+      <Control
+        name="Number of reviews"
+        createSortPageURL={createSortPageURL}
+        currentSort={currentSort}
+        ascState={SORT_ORDERS.num_reviews_asc}
+        descState={SORT_ORDERS.num_reviews_desc}
+      />
+      <Control
+        name="Average user rating"
+        createSortPageURL={createSortPageURL}
+        currentSort={currentSort}
+        ascState={SORT_ORDERS.avg_rating_asc}
+        descState={SORT_ORDERS.avg_rating_desc}
+      />
     </div>
   );
 };

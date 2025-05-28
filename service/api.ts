@@ -1,5 +1,4 @@
-export const fetcher = (url: string) =>
-  fetch(url, { next: { revalidate: 3600 } }).then((r) => r.json());
+export const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export const getItems = (
   filters: {

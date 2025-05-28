@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
@@ -26,7 +26,7 @@ const Videos = ({
   const notInterstedList = useUserStore((store) => store.filter);
 
   // Calculate how many extra rows we might need based on filter list size
-  const estimatedExtraRows = Math.min(notInterstedList.length, 50); // Cap at reasonable number
+  const estimatedExtraRows = notInterstedList.length;
   const adjustedRows = DESIRED_MOVIES_COUNT + estimatedExtraRows;
 
   const { data, mutate, isLoading } = useSWR<{
@@ -53,7 +53,7 @@ const Videos = ({
 
     return data.response.docs
       .filter(({ identifier }) => !notInterstedList.includes(identifier))
-      .map(({ identifier }) => identifier as string)
+      .map(({ identifier }) => identifier)
       .slice(0, DESIRED_MOVIES_COUNT); // Ensure we don't show more than desired
   }, [data, notInterstedList]);
 
@@ -101,13 +101,11 @@ const Videos = ({
     router.push(`/${name}`);
   };
 
-  const handleDropDown = (key: string, id: string) => {
-    if (key === "not_interested") {
-      notInterested(id);
-    }
-  };
-
-  const { data: movies = [], isLoading: moviesLoading } = useSWRInfinite<{
+  const {
+    data: movies = [],
+    isLoading: moviesLoading,
+    mutate: mutateItems,
+  } = useSWRInfinite<{
     files: { name: string }[];
     metadata: {
       description: string;
@@ -115,9 +113,20 @@ const Videos = ({
       identifier: string;
     };
   }>((index) => getItem(moviesIds[index]), fetcher, {
-    parallel: true,
     initialSize: moviesIds.length,
   });
+
+  const handleDropDown = useCallback(
+    async (key: string, id: string) => {
+      if (key === "not_interested") {
+        await mutateItems(
+          movies.filter((item) => item.metadata.identifier !== id),
+        );
+        notInterested(id);
+      }
+    },
+    [moviesIds],
+  );
 
   if (isLoading || moviesLoading) {
     return <Loading className="h-full" />;
