@@ -16,6 +16,7 @@ export default async function Cartoons({
 
   return (
     <section className="h-full flex flex-col gap-4">
+      <h2 className="text-3xl text-primary">Cartoons</h2>
       <ListControls />
 
       <Suspense fallback={<Loading className="flex-grow" />}>

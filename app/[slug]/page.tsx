@@ -1,43 +1,12 @@
+import Link from "next/link";
 import { Chip } from "@heroui/chip";
 
 import { fetcher, getItem } from "@/service/api";
 import Player from "@/components/player";
 import Details from "@/components/details";
+import { topicParser } from "@/utils";
 
 const NOT_TOPIC = ["no-preview", "more_animation", "deemphasize", ""];
-
-const topicParser = (topic: string) => {
-  switch (topic) {
-    case "Film_Noir":
-      return "Noir";
-    case "feature_films":
-      return "Feature Film";
-    case "moviesandfilms":
-      return "Movie";
-    case "animationandcartoons":
-      return "Animation";
-    case "siggraph":
-      return "SIGGRAPH";
-    case "vintage_cartoons":
-      return "Vintage Cartoons";
-    case "classic_cartoons":
-      return "Classic Cartoons";
-    case "machinima":
-      return "Machinima";
-
-    // OTHER TYPES
-    case "xfrcollective":
-      return "XFR Collective";
-    case "vj_loops":
-      return "VJ Loops";
-    case "artsandmusicvideos":
-      return "Art & Music";
-    case "stream_only":
-      return "Stream Only";
-    default:
-      return topic;
-  }
-};
 
 export default async function MoviePage({
   params,
@@ -56,9 +25,13 @@ export default async function MoviePage({
         {(collection as string[])
           .filter((topic) => !NOT_TOPIC.includes(topic))
           .map((topic) => (
-            <Chip key={topic} className="mr-2">
-              {topicParser(topic)}
-            </Chip>
+            <Link
+              key={topic}
+              href={`/collection/${topic}`}
+              className="cursor-pointer"
+            >
+              <Chip className="mr-2">{topicParser(topic)}</Chip>
+            </Link>
           ))}
       </div>
 

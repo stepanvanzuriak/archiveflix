@@ -16,6 +16,7 @@ export default async function ArtsAndMusic({
 
   return (
     <section className="h-full flex flex-col gap-4">
+      <h2 className="text-3xl text-primary">Arts & Music</h2>
       <ListControls />
 
       <Suspense fallback={<Loading className="flex-grow" />}>
