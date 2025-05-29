@@ -11,12 +11,14 @@ export default function Footer() {
   }
 
   return (
-    <footer className="px-6 max-w-7xl text-center items-center text-small justify-center py-3">
-      <Link href="/about" className="text-primary">
-        All media
-      </Link>{" "}
-      is sourced from public archives and is provided as-is. Viewer discretion
-      is advised.
+    <footer className="w-full px-6 items-center text-small justify-center py-3">
+      <div className="max-w-7xl m-auto text-center">
+        <Link href="/about" className="text-primary">
+          All media
+        </Link>{" "}
+        is sourced from public archives and is provided as-is. Viewer discretion
+        is advised.
+      </div>
     </footer>
   );
 }
