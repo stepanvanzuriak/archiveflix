@@ -119,10 +119,10 @@ const Videos = ({
   const handleDropDown = useCallback(
     async (key: string, id: string) => {
       if (key === "not_interested") {
+        notInterested(id);
         await mutateItems(
           movies.filter((item) => item.metadata.identifier !== id),
         );
-        notInterested(id);
       }
     },
     [moviesIds],

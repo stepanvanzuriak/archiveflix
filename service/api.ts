@@ -1,10 +1,4 @@
-export const fetcher = (url: string, method: string = "GET") =>
-  fetch(url, {
-    method,
-    headers: {
-      Authorization: `LOW ${process.env.S3}:${process.env.S3_SECRET}`,
-    },
-  }).then((r) => r.json());
+export const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export const getItems = (
   filters: {
@@ -17,15 +11,25 @@ export const getItems = (
 ): string => {
   const options = {
     rows: "12",
-    fields: "identifier",
-    page,
     sort: "num_reviews desc",
     ...opts,
+    page,
   };
 
-  return `https://archive.org/advancedsearch.php?q=collection%3A%28${filters.collection}%29&fl%5B%5D=identifier&rows=${options.rows}&page=${options.page}&output=json&sort%5B%5D=${options.sort}`;
+  const params = new URLSearchParams({
+    ...(filters.collection && { collection: filters.collection }),
+    ...(filters.subject && { subject: filters.subject }),
+    ...(filters.creator && { creator: filters.creator }),
+    page: options.page.toString(),
+    rows: options.rows,
+    sort: options.sort,
+  });
+
+  return `/api/archive/search?${params.toString()}`;
 };
 
 export const getItem = (id: string) => {
-  return `https://archive.org/metadata/${id}`;
+  const params = new URLSearchParams({ id });
+
+  return `/api/archive/metadata?${params.toString()}`;
 };
