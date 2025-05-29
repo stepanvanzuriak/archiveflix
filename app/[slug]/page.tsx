@@ -14,6 +14,7 @@ export default async function MoviePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
   const item = await fetcher(getItem(slug));
   const { title, description, collection } = item.metadata;
 
@@ -39,9 +40,11 @@ export default async function MoviePage({
         className="injected mb-4 text-pretty"
         dangerouslySetInnerHTML={{ __html: description as string }}
       />
+
       <Details
         identifier={slug}
         metadata={item.metadata}
+        reviews={item.reviews}
         files={item.files as Record<string, string>[]}
       />
     </div>

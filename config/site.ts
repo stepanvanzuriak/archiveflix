@@ -10,11 +10,11 @@ export const siteConfig = {
     },
     {
       label: "Cartoons",
-      href: "/cartoons",
+      href: "/collection/animationandcartoons",
     },
     {
       label: "Arts & Music",
-      href: "/artsandmusic",
+      href: "/collection/artsandmusicvideos",
     },
   ],
   navMenuItems: [
@@ -24,11 +24,11 @@ export const siteConfig = {
     },
     {
       label: "Cartoons",
-      href: "/cartoons",
+      href: "/collection/cartoons",
     },
     {
       label: "Arts & Music",
-      href: "/artsandmusic",
+      href: "/collection/artsandmusic",
     },
     // {
     //   label: "Dashboard",

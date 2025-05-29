@@ -11,7 +11,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full text-center items-center text-small justify-center py-3">
+    <footer className="px-6 max-w-7xl text-center items-center text-small justify-center py-3">
       <Link href="/about" className="text-primary">
         All media
       </Link>{" "}
