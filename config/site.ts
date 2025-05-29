@@ -9,7 +9,7 @@ export const siteConfig = {
       href: "/",
     },
     {
-      label: "Cartoons",
+      label: "Animation",
       href: "/collection/animationandcartoons",
     },
     {
@@ -23,7 +23,7 @@ export const siteConfig = {
       href: "/",
     },
     {
-      label: "Cartoons",
+      label: "Animation",
       href: "/collection/animationandcartoons",
     },
     {
