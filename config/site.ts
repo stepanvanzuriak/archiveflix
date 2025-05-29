@@ -2,7 +2,7 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "ArchiveFlix",
-  description: "Make beautiful websites regardless of your design experience.",
+  description: "",
   navItems: [
     {
       label: "Features",
@@ -24,11 +24,11 @@ export const siteConfig = {
     },
     {
       label: "Cartoons",
-      href: "/collection/cartoons",
+      href: "/collection/animationandcartoons",
     },
     {
       label: "Arts & Music",
-      href: "/collection/artsandmusic",
+      href: "/collection/artsandmusicvideos",
     },
     // {
     //   label: "Dashboard",
