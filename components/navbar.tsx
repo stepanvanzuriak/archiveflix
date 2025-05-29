@@ -9,14 +9,14 @@ import {
   NavbarMenu,
   NavbarMenuItem,
 } from "@heroui/navbar";
+import { Button } from "@heroui/button";
+import Link from "next/link";
+import { useState } from "react";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Button } from "@heroui/button";
-import Link from "next/link";
-import { useState } from "react";
 
 // const MainIcon = () => (
 //   <svg
@@ -61,7 +61,12 @@ export const Navbar = () => {
   // );
 
   return (
-    <HeroUINavbar isMenuOpen={isMenuOpen} maxWidth="xl" position="sticky">
+    <HeroUINavbar
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
+      maxWidth="xl"
+      position="sticky"
+    >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink
@@ -122,7 +127,6 @@ export const Navbar = () => {
           ))}
         </NavbarMenu>
         <NavbarMenuToggle
-          onClick={() => setIsMenuOpen(true)}
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         />
       </NavbarContent>
