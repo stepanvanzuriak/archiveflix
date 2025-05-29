@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Chip } from "@heroui/chip";
 
-import { fetcher, getItem } from "@/service/api";
+import { fetcher } from "@/service/api";
 import Player from "@/components/player";
 import Details from "@/components/details";
 import { topicParser } from "@/utils";
@@ -15,7 +15,12 @@ export default async function MoviePage({
 }) {
   const { slug } = await params;
 
-  const item = await fetcher(getItem(slug));
+  const access = process.env.S3!;
+  const secret = process.env.S3_SECRET!;
+
+  const item = await fetcher(`https://archive.org/metadata/${slug}`, {
+    Authorization: `LOW ${access}:${secret}`,
+  });
   const { title, description, collection } = item.metadata;
 
   return (
