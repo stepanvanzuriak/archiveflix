@@ -1,3 +1,5 @@
+"use client";
+
 const Player = ({ slug }: { slug: string }) => {
   return (
     <>

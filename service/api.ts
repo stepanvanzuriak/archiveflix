@@ -1,4 +1,10 @@
-export const fetcher = (url: string) => fetch(url).then((r) => r.json());
+export const fetcher = (url: string, method: string = "GET") =>
+  fetch(url, {
+    method,
+    headers: {
+      Authorization: `LOW ${process.env.S3}:${process.env.S3_SECRET}`,
+    },
+  }).then((r) => r.json());
 
 export const getItems = (
   filters: {
