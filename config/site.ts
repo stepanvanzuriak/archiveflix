@@ -19,6 +19,10 @@ export const siteConfig = {
   ],
   navMenuItems: [
     {
+      label: "Profile",
+      href: "/profile",
+    },
+    {
       label: "Features",
       href: "/",
     },
@@ -30,6 +34,7 @@ export const siteConfig = {
       label: "Arts & Music",
       href: "/collection/artsandmusicvideos",
     },
+
     // {
     //   label: "Dashboard",
     //   href: "/dashboard",

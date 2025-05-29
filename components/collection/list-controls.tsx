@@ -4,7 +4,7 @@ import { Button } from "@heroui/button";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-const ArrowDown = () => {
+function ArrowDown() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -21,9 +21,9 @@ const ArrowDown = () => {
       />
     </svg>
   );
-};
+}
 
-const ArrowUp = () => {
+function ArrowUp() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +40,7 @@ const ArrowUp = () => {
       />
     </svg>
   );
-};
+}
 
 const SORT_ORDERS = {
   num_reviews_desc: "num_reviews desc",
@@ -49,27 +49,30 @@ const SORT_ORDERS = {
   avg_rating_asc: "avg_rating asc",
 };
 
-const Control = ({
+function Control({
   createSortPageURL,
   currentSort,
   ascState,
   descState,
   name,
+  mobileName,
 }: {
+  mobileName: string;
   name: string;
   ascState: string;
   descState: string;
   currentSort: string;
   createSortPageURL: (url: string) => string;
-}) => {
+}) {
   if (currentSort !== ascState && currentSort !== descState) {
     return (
-      <Link href={createSortPageURL(ascState)}>
+      <Link href={createSortPageURL(descState)}>
         <Button
           color="primary"
           className="bg-transparent border-primary border-2 text-primary"
         >
-          {name}
+          <span className="hidden sm:inline">{name}</span>
+          <span className="sm:hidden inline">{mobileName}</span>
         </Button>
       </Link>
     );
@@ -83,13 +86,18 @@ const Control = ({
         color="primary"
         className="bg-transparent border-primary border-2 text-primary"
       >
-        {name} {currentSort === ascState ? <ArrowUp /> : <ArrowDown />}
+        <span className="hidden sm:flex items-center gap-2">
+          {name} {currentSort === ascState ? <ArrowUp /> : <ArrowDown />}
+        </span>
+        <span className="sm:hidden flex items-center gap-2">
+          {mobileName} {currentSort === ascState ? <ArrowUp /> : <ArrowDown />}
+        </span>
       </Button>
     </Link>
   );
-};
+}
 
-const ListControls = () => {
+export default function ListControls() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentSort =
@@ -107,6 +115,7 @@ const ListControls = () => {
     <div className="flex gap-2">
       <Control
         name="Number of reviews"
+        mobileName="# reviews"
         createSortPageURL={createSortPageURL}
         currentSort={currentSort}
         ascState={SORT_ORDERS.num_reviews_asc}
@@ -114,6 +123,7 @@ const ListControls = () => {
       />
       <Control
         name="Average user rating"
+        mobileName="Avg. user rating"
         createSortPageURL={createSortPageURL}
         currentSort={currentSort}
         ascState={SORT_ORDERS.avg_rating_asc}
@@ -121,6 +131,4 @@ const ListControls = () => {
       />
     </div>
   );
-};
-
-export default ListControls;
+}

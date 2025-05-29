@@ -4,7 +4,7 @@ import { Button } from "@heroui/button";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-function NextPage() {
+export default function NextPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get("page")) || 1;
@@ -30,5 +30,3 @@ function NextPage() {
     </div>
   );
 }
-
-export default NextPage;

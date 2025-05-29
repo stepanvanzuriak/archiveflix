@@ -1,4 +1,4 @@
-import CollectionView from "@/components/collection-view";
+import CollectionView from "@/components/collection/collection-view";
 
 export default async function Cartoons({
   searchParams,

@@ -12,7 +12,7 @@ import { Button } from "@heroui/button";
 
 import { useUserStore } from "@/stores/user-store-provider";
 
-const UserProfile = () => {
+export default function UserProfile() {
   const filter = useUserStore((store) => store.filter);
   const removeFilter = useUserStore((store) => store.removeFromFilter);
 
@@ -37,6 +37,4 @@ const UserProfile = () => {
       </Table>
     </div>
   );
-};
-
-export default UserProfile;
+}

@@ -4,15 +4,16 @@ import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
-import MovieCard from "./movie-card";
-import Loading from "./loading";
+import Loading from "../layout/loading";
+
+import VideoCard from "./video-card";
 
 import { useUserStore } from "@/stores/user-store-provider";
 import { fetcher, getItem, getItems } from "@/service/api";
 
 const DESIRED_MOVIES_COUNT = 12; // Target number of movies to display
 
-const Videos = ({
+const VideosList = ({
   currentPage,
   currentSort,
   collection,
@@ -135,7 +136,7 @@ const Videos = ({
   return (
     <div className="gap-2 grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 flex-grow">
       {movies.map((movie) => (
-        <MovieCard
+        <VideoCard
           movie={movie}
           handleDropDown={handleDropDown}
           key={movie.metadata.identifier}
@@ -146,4 +147,4 @@ const Videos = ({
   );
 };
 
-export default Videos;
+export default VideosList;

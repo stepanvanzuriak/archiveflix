@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 
-import ListControls from "./list-controls";
-import Loading from "./loading";
-import Videos from "./videos";
+import Loading from "../layout/loading";
+import Videos from "../video/videos-list";
+
 import NextPage from "./next-page";
+import ListControls from "./list-controls";
 
 import { topicParser } from "@/utils";
 

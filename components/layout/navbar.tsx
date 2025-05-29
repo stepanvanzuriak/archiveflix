@@ -15,10 +15,11 @@ import { useState } from "react";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 
-import { siteConfig } from "@/config/site";
-import { ThemeSwitch } from "@/components/theme-switch";
+import ThemeSwitch from "./theme-switch";
 
-export const Navbar = () => {
+import { siteConfig } from "@/config/site";
+
+export default function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -35,7 +36,9 @@ export const Navbar = () => {
             className="flex justify-start items-center text-foreground"
             href="/"
           >
-            <Button variant="bordered">ArchiveFlix</Button>
+            <Button variant="bordered" className="border-primary">
+              ArchiveFlix
+            </Button>
           </NextLink>
         </NavbarBrand>
         <ul className="hidden sm:flex gap-4 justify-start ml-2">
@@ -64,9 +67,6 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <Link href="/profile">
-          <Button>Profile</Button>
-        </Link>
         <ThemeSwitch />
 
         <NavbarMenu>
@@ -94,4 +94,4 @@ export const Navbar = () => {
       </NavbarContent>
     </HeroUINavbar>
   );
-};
+}

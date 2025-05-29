@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Chip } from "@heroui/chip";
 
 import { fetcher } from "@/service/api";
-import Player from "@/components/player";
-import Details from "@/components/details";
+import Player from "@/components/video/player";
+import Details from "@/components/video/details";
 import { topicParser } from "@/utils";
 
 const NOT_TOPIC = ["no-preview", "more_animation", "deemphasize", ""];

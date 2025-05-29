@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     const data = await response.json();
 
     return Response.json(data);
-  } catch (err) {
+  } catch {
     return Response.json({ error: "Failed to fetch from archive.org" });
   }
 }

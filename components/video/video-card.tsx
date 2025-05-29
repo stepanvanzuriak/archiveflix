@@ -7,7 +7,7 @@ import {
 } from "@heroui/dropdown";
 import Image from "next/image";
 
-const MovieCard = ({
+const VideoCard = ({
   movie,
   openPage,
   handleDropDown,
@@ -93,8 +93,8 @@ const MovieCard = ({
               fill
               priority
               alt={thumbnail.name as string}
-              className="max-w-64 max-h-40 m-auto grayscale-50"
-              sizes="(max-width: 256px) (max-height: 160px)"
+              className="max-w-[220px] max-h-40 m-auto grayscale-50 rounded-large"
+              sizes="(max-width: 220px) (max-height: 160px)"
               src={`https://archive.org/download/${movie.metadata.identifier as string}/${thumbnail.name as string}`}
             />
           )}
@@ -104,4 +104,4 @@ const MovieCard = ({
   );
 };
 
-export default MovieCard;
+export default VideoCard;
