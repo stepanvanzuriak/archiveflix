@@ -18,6 +18,8 @@ export const topicParser = (topic: string) => {
       return "Classic Cartoons";
     case "machinima":
       return "Machinima";
+    case "silent_films":
+      return "Silent Films";
 
     // OTHER TYPES
     case "xfrcollective":

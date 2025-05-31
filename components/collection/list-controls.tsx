@@ -1,8 +1,13 @@
 "use client";
 
+import { useCallback } from "react";
 import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { debounce } from "lodash";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+import { SearchIcon } from "../layout/icons";
 
 function ArrowDown() {
   return (
@@ -99,9 +104,11 @@ function Control({
 
 export default function ListControls() {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const currentSort =
     (searchParams.get("sort") as string) || "num_reviews desc";
+  const currentSearch = searchParams.get("search");
 
   const createSortPageURL = (sortOrder: string) => {
     const params = new URLSearchParams(searchParams);
@@ -111,24 +118,65 @@ export default function ListControls() {
     return `${pathname}?${params.toString()}`;
   };
 
+  const createSearchPageURL = (title: string) => {
+    const params = new URLSearchParams(searchParams);
+
+    if (!title.length) {
+      params.delete("search");
+
+      return `${pathname}?${params.toString()}`;
+    }
+
+    params.set("search", title);
+
+    return `${pathname}?${params.toString()}`;
+  };
+
+  const onSearch = useCallback(
+    debounce((value: string) => {
+      const nextURL = createSearchPageURL(value);
+
+      router.push(nextURL);
+    }, 500),
+    [],
+  );
+
   return (
-    <div className="flex gap-2">
-      <Control
-        name="Number of reviews"
-        mobileName="# reviews"
-        createSortPageURL={createSortPageURL}
-        currentSort={currentSort}
-        ascState={SORT_ORDERS.num_reviews_asc}
-        descState={SORT_ORDERS.num_reviews_desc}
+    <div className="flex sm:flex-row flex-col justify-between sm:gap-2 gap-4 text-primary">
+      <Input
+        classNames={{
+          base: "max-w-full sm:max-w-[14rem] h-10",
+          mainWrapper: "h-full",
+          input:
+            "text-small text-primary group-data-[has-value=true]:text-primary",
+          inputWrapper:
+            "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
+        }}
+        placeholder="Filter by title"
+        size="sm"
+        startContent={<SearchIcon size={18} />}
+        type="search"
+        defaultValue={currentSearch || ""}
+        onChange={(event) => onSearch(event.target.value)}
       />
-      <Control
-        name="Average user rating"
-        mobileName="Avg. user rating"
-        createSortPageURL={createSortPageURL}
-        currentSort={currentSort}
-        ascState={SORT_ORDERS.avg_rating_asc}
-        descState={SORT_ORDERS.avg_rating_desc}
-      />
+      <div className="flex gap-4">
+        <Control
+          name="Number of reviews"
+          mobileName="# reviews"
+          createSortPageURL={createSortPageURL}
+          currentSort={currentSort}
+          ascState={SORT_ORDERS.num_reviews_asc}
+          descState={SORT_ORDERS.num_reviews_desc}
+        />
+        <Control
+          name="Average user rating"
+          mobileName="Avg. user rating"
+          createSortPageURL={createSortPageURL}
+          currentSort={currentSort}
+          ascState={SORT_ORDERS.avg_rating_asc}
+          descState={SORT_ORDERS.avg_rating_desc}
+        />
+      </div>
     </div>
   );
 }

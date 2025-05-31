@@ -7,11 +7,13 @@ export async function GET(req: NextRequest) {
   const page = req.nextUrl.searchParams.get("page");
   const sort = req.nextUrl.searchParams.get("sort");
   const rows = req.nextUrl.searchParams.get("rows");
+  const title = req.nextUrl.searchParams.get("title");
 
   const q = [
     collection ? `collection:(${collection})` : "",
     subject ? `subject:(${subject})` : "",
     creator ? `creator:(${creator})` : "",
+    title ? `title:(${title})` : "",
   ]
     .filter(Boolean)
     .join(" AND ");

@@ -5,6 +5,7 @@ import { fetcher } from "@/service/api";
 import Player from "@/components/video/player";
 import Details from "@/components/video/details";
 import { topicParser } from "@/utils";
+import VideoActions from "@/components/video/video-actions";
 
 const NOT_TOPIC = ["no-preview", "more_animation", "deemphasize", ""];
 
@@ -21,12 +22,16 @@ export default async function MoviePage({
   const item = await fetcher(`https://archive.org/metadata/${slug}`, {
     Authorization: `LOW ${access}:${secret}`,
   });
-  const { title, description, collection } = item.metadata;
+
+  const { title, description, collection, identifier } = item.metadata;
 
   return (
     <div>
       <Player slug={slug} />
-      <h1 className="text-2xl text-primary mb-4">{title as string}</h1>
+      <div className="flex items-center mb-4 gap-4">
+        <h1 className="text-2xl text-primary">{title as string}</h1>
+        <VideoActions identifier={identifier} redirectOnNotInterested />
+      </div>
       <div className="mb-4">
         {(collection as string[])
           .filter((topic) => !NOT_TOPIC.includes(topic))

@@ -9,6 +9,7 @@ export const getItems = (
     collection?: string;
     subject?: string;
     creator?: string;
+    title?: string;
   },
   page: number = 1,
   opts: { sort?: string; rows?: string } = {},
@@ -24,6 +25,7 @@ export const getItems = (
     ...(filters.collection && { collection: filters.collection }),
     ...(filters.subject && { subject: filters.subject }),
     ...(filters.creator && { creator: filters.creator }),
+    ...(filters.title && { title: filters.title }),
     page: options.page.toString(),
     rows: options.rows,
     sort: options.sort,

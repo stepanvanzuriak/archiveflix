@@ -1,16 +1,12 @@
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-} from "@heroui/dropdown";
 import Image from "next/image";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+
+import VideoActions from "./video-actions";
 
 const VideoCard = ({
   movie,
   openPage,
-  handleDropDown,
+  onNotInterested,
 }: {
   movie: {
     files: { name: string }[];
@@ -21,7 +17,7 @@ const VideoCard = ({
     };
   };
   openPage: (page: string) => void;
-  handleDropDown: (key: string, id: string) => void;
+  onNotInterested: (id: string) => void;
 }) => {
   const [thumbnail] = movie.files.filter(
     ({ name }) => name === "__ia_thumb.jpg",
@@ -51,33 +47,10 @@ const VideoCard = ({
             >
               {title}
             </h4>
-            <Dropdown>
-              <DropdownTrigger className="text-primary min-w-[24px]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
-                  />
-                </svg>
-              </DropdownTrigger>
-
-              <DropdownMenu
-                aria-label="Static Actions"
-                onAction={(key) =>
-                  handleDropDown(key as string, movie.metadata.identifier)
-                }
-              >
-                <DropdownItem key="not_interested">Not interested</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+            <VideoActions
+              identifier={identifier}
+              onNotInterested={onNotInterested}
+            />
           </div>
 
           <small

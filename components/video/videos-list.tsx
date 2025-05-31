@@ -5,6 +5,7 @@ import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
 import Loading from "../layout/loading";
+import NextPage from "../collection/next-page";
 
 import VideoCard from "./video-card";
 
@@ -17,13 +18,14 @@ const VideosList = ({
   currentPage,
   currentSort,
   collection,
+  currentSearch,
 }: {
   currentPage: string;
   currentSort: string;
-  collection: string;
+  collection?: string;
+  currentSearch: string;
 }) => {
   const router = useRouter();
-  const notInterested = useUserStore((store) => store.addToFilter);
   const notInterstedList = useUserStore((store) => store.filter);
 
   // Calculate how many extra rows we might need based on filter list size
@@ -39,6 +41,7 @@ const VideosList = ({
     getItems(
       {
         collection,
+        title: currentSearch,
       },
       Number(currentPage),
       {
@@ -52,11 +55,16 @@ const VideosList = ({
   const moviesIds = useMemo(() => {
     if (!data?.response.docs) return [];
 
-    return data.response.docs
+    const movies = data.response.docs
       .filter(({ identifier }) => !notInterstedList.includes(identifier))
-      .map(({ identifier }) => identifier)
-      .slice(0, DESIRED_MOVIES_COUNT); // Ensure we don't show more than desired
-  }, [data, notInterstedList]);
+      .map(({ identifier }) => identifier);
+
+    if (movies.length <= DESIRED_MOVIES_COUNT) {
+      return movies;
+    }
+
+    return movies.slice(0, DESIRED_MOVIES_COUNT); // Ensure we don't show more than desired
+  }, [data, notInterstedList, currentSearch]);
 
   // Check if we need to fetch more data
   const needsMoreData = useMemo(() => {
@@ -74,7 +82,9 @@ const VideosList = ({
 
   // Refetch with more rows if needed
   useEffect(() => {
-    if (needsMoreData && data) {
+    const shouldFetchMore = needsMoreData && data && !currentSearch;
+
+    if (shouldFetchMore) {
       const newRowCount = Math.min(
         adjustedRows + DESIRED_MOVIES_COUNT,
         100, // Cap to prevent too large requests
@@ -95,6 +105,7 @@ const VideosList = ({
     collection,
     currentPage,
     currentSort,
+    currentSearch,
     mutate,
   ]);
 
@@ -117,33 +128,54 @@ const VideosList = ({
     initialSize: moviesIds.length,
   });
 
-  const handleDropDown = useCallback(
-    async (key: string, id: string) => {
-      if (key === "not_interested") {
-        notInterested(id);
-        await mutateItems(
-          movies.filter((item) => item.metadata.identifier !== id),
-        );
-      }
-    },
-    [moviesIds],
-  );
+  const onNotInterested = useCallback((id: string) => {
+    mutateItems(movies.filter((item) => item.metadata.identifier !== id));
+  }, []);
+
+  useEffect(() => {
+    const mutations = async () => {
+      await mutate({ response: { docs: [], numFound: 0 } });
+      await mutateItems([]);
+    };
+
+    if (currentSearch) {
+      mutations();
+    }
+  }, [currentSearch]);
 
   if (isLoading || moviesLoading) {
     return <Loading className="h-full" />;
   }
 
+  const filteredMovies = movies.filter((movie) => movie?.metadata?.identifier);
+
+  // Dynamic grid class based on item count
+  const getGridClass = (itemCount: number) => {
+    if (itemCount === 1) return "grid-cols-1 max-w-sm mx-auto";
+    if (itemCount === 2)
+      return "grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto sm:mx-0";
+    if (itemCount === 3)
+      return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto lg:mx-0";
+
+    return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:grid-rows-3";
+  };
+
   return (
-    <div className="gap-2 grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 flex-grow">
-      {movies.map((movie) => (
-        <VideoCard
-          movie={movie}
-          handleDropDown={handleDropDown}
-          key={movie.metadata.identifier}
-          openPage={openPage}
-        />
-      ))}
-    </div>
+    <>
+      <div
+        className={`gap-2 grid ${getGridClass(filteredMovies.length)} flex-grow`}
+      >
+        {filteredMovies.map((movie) => (
+          <VideoCard
+            movie={movie}
+            onNotInterested={onNotInterested}
+            key={movie.metadata.identifier}
+            openPage={openPage}
+          />
+        ))}
+      </div>
+      {filteredMovies.length > 0 && <NextPage />}
+    </>
   );
 };
 

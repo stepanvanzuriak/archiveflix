@@ -6,7 +6,7 @@ export const siteConfig = {
   navItems: [
     {
       label: "Features",
-      href: "/",
+      href: "/collection/feature_films",
     },
     {
       label: "Animation",
@@ -24,7 +24,7 @@ export const siteConfig = {
     },
     {
       label: "Features",
-      href: "/",
+      href: "/collection/feature_films",
     },
     {
       label: "Animation",
