@@ -162,19 +162,27 @@ const VideosList = ({
 
   return (
     <>
-      <div
-        className={`gap-2 grid ${getGridClass(filteredMovies.length)} flex-grow`}
-      >
-        {filteredMovies.map((movie) => (
-          <VideoCard
-            movie={movie}
-            onNotInterested={onNotInterested}
-            key={movie.metadata.identifier}
-            openPage={openPage}
-          />
-        ))}
-      </div>
-      {filteredMovies.length > 0 && <NextPage />}
+      {filteredMovies.length > 0 ? (
+        <>
+          <div
+            className={`gap-2 grid ${getGridClass(filteredMovies.length)} flex-grow`}
+          >
+            {filteredMovies.map((movie) => (
+              <VideoCard
+                movie={movie}
+                onNotInterested={onNotInterested}
+                key={movie.metadata.identifier}
+                openPage={openPage}
+              />
+            ))}
+          </div>
+          <NextPage />
+        </>
+      ) : (
+        <div className="flex items-center justify-center flex-grow">
+          <h1 className="text-4xl">No results</h1>
+        </div>
+      )}
     </>
   );
 };
