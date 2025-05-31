@@ -33,7 +33,7 @@ export default function HomeSearch() {
   );
 
   return (
-    <div className="max-w-[50%] w-full">
+    <div className="md:max-w-[50%] w-full">
       <h1 className="mb-8 text-3xl text-center">Search videos by title</h1>
       <Input
         fullWidth
