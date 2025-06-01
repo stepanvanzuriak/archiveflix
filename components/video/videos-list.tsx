@@ -27,6 +27,8 @@ const VideosList = ({
 }) => {
   const router = useRouter();
   const notInterstedList = useUserStore((store) => store.filter);
+  const likes = useUserStore((store) => store.likes);
+  const watched = useUserStore((store) => store.watched);
 
   // Calculate how many extra rows we might need based on filter list size
   const estimatedExtraRows = notInterstedList.length;
@@ -173,6 +175,8 @@ const VideosList = ({
                 onNotInterested={onNotInterested}
                 key={movie.metadata.identifier}
                 openPage={openPage}
+                isLiked={likes.includes(movie.metadata.identifier)}
+                isWatched={watched.includes(movie.metadata.identifier)}
               />
             ))}
           </div>

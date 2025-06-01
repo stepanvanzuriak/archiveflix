@@ -431,6 +431,8 @@ const CategoryRow: React.FC<{
           <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
             {sortedMovies.map((movie) => (
               <VideoCard
+                isLiked={false}
+                isWatched={false}
                 key={movie.metadata.identifier}
                 onNotInterested={onNotInterested}
                 movie={movie}
@@ -453,6 +455,7 @@ const HomeRecommendations: React.FC = () => {
   // Get user preferences from store
   const likes = useUserStore((store) => store.likes);
   const filter = useUserStore((store) => store.filter);
+  const watched = useUserStore((store) => store.watched);
 
   // Get 15 random likes using lodash
   const randomLikes = useMemo(() => {
@@ -481,26 +484,27 @@ const HomeRecommendations: React.FC = () => {
   }, []);
 
   // Use hooks for all categories at the top level
+  const filteredItems = Array.from(new Set([...filter, ...likes, ...watched]));
   const categoryData = {
     "Popular Classic Films": useCategoryData(
       CATEGORIES[0],
       activeCategories.includes("Popular Classic Films"),
-      filter,
+      filteredItems,
     ),
     "Educational Content": useCategoryData(
       CATEGORIES[1],
       activeCategories.includes("Educational Content"),
-      filter,
+      filteredItems,
     ),
     "Animation Collection": useCategoryData(
       CATEGORIES[2],
       activeCategories.includes("Animation Collection"),
-      filter,
+      filteredItems,
     ),
     "Recently Added": useCategoryData(
       CATEGORIES[3],
       activeCategories.includes("Recently Added"),
-      filter,
+      filteredItems,
     ),
   };
 
@@ -641,7 +645,7 @@ const HomeRecommendations: React.FC = () => {
       )}
 
       {/* Recommendation Categories */}
-      <div className="px-12 pb-12">
+      <div>
         {CATEGORIES.map((category) => {
           const data = categoryData[category.name as keyof typeof categoryData];
 

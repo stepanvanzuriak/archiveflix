@@ -11,7 +11,7 @@ import {
 } from "@heroui/dropdown";
 import { Button } from "@heroui/button";
 
-import { HeartIcon, HideIcon } from "../layout/icons";
+import { HeartIcon, HideIcon, Watched } from "../layout/icons";
 
 import { useUserStore } from "@/stores/user-store-provider";
 
@@ -29,8 +29,10 @@ export default function VideoActions({
   const router = useRouter();
   const notInterested = useUserStore((store) => store.addToFilter);
   const likeVideo = useUserStore((store) => store.addToLikes);
+  const addToWatched = useUserStore((store) => store.setWatched);
   const notInterestedFilter = useUserStore((store) => store.filter);
   const likes = useUserStore((state) => state.likes);
+  const watched = useUserStore((state) => state.watched);
 
   const isNotInterested = useMemo(() => {
     return notInterestedFilter.includes(identifier);
@@ -39,6 +41,10 @@ export default function VideoActions({
   const isLiked = useMemo(() => {
     return likes.includes(identifier);
   }, [identifier, likes]);
+
+  const isWatched = useMemo(() => {
+    return watched.includes(identifier);
+  }, [watched]);
 
   const handleDropDown = useCallback(async (key: string, id: string) => {
     if (key === "not_interested") {
@@ -54,6 +60,8 @@ export default function VideoActions({
       }
     } else if (key === "like") {
       likeVideo(id);
+    } else if (key === "watched") {
+      addToWatched(id);
     }
   }, []);
 
@@ -85,6 +93,18 @@ export default function VideoActions({
         >
           <DropdownItem
             startContent={
+              <Watched
+                className={clsx({
+                  "text-blue-400": isWatched,
+                })}
+              />
+            }
+            key="watched"
+          >
+            Watched
+          </DropdownItem>
+          <DropdownItem
+            startContent={
               <HeartIcon
                 className={clsx({
                   "text-red-400": isLiked,
@@ -113,7 +133,21 @@ export default function VideoActions({
       {withExpandedVersion && (
         <div className="sm:flex hidden gap-4">
           <Button
-            aria-label="Not interested"
+            aria-label="Watched"
+            size="sm"
+            variant="bordered"
+            radius="md"
+            isIconOnly
+            className={clsx({
+              "border-blue-400": isLiked,
+            })}
+            onPress={() => handleDropDown("like", identifier)}
+          >
+            <Watched />
+          </Button>
+
+          <Button
+            aria-label="Like"
             size="sm"
             variant="bordered"
             radius="md"
