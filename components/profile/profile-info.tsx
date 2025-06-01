@@ -15,8 +15,10 @@ import { useUserStore } from "@/stores/user-store-provider";
 export default function UserProfile() {
   const filter = useUserStore((store) => store.filter);
   const likes = useUserStore((store) => store.likes);
+  const watched = useUserStore((store) => store.watched);
   const removeLike = useUserStore((state) => state.addToLikes);
   const removeFilter = useUserStore((store) => store.addToFilter);
+  const removeWatched = useUserStore((store) => store.setWatched);
 
   return (
     <div className="flex gap-8">
@@ -33,6 +35,24 @@ export default function UserProfile() {
                 <TableCell>{id}</TableCell>
                 <TableCell>
                   <Button onPress={() => removeLike(id)}>Remove</Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        <h2 className="text-2xl mb-4">Watched</h2>
+        <Table aria-label="Watched">
+          <TableHeader>
+            <TableColumn>ID</TableColumn>
+            <TableColumn>ACTIONS</TableColumn>
+          </TableHeader>
+          <TableBody>
+            {watched.map((id) => (
+              <TableRow key={id}>
+                <TableCell>{id}</TableCell>
+                <TableCell>
+                  <Button onPress={() => removeWatched(id)}>Remove</Button>
                 </TableCell>
               </TableRow>
             ))}
