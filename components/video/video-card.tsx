@@ -1,7 +1,11 @@
 import Image from "next/image";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 
+import { HeartIcon } from "../layout/icons";
+
 import VideoActions from "./video-actions";
+
+import { useUserStore } from "@/stores/user-store-provider";
 
 const VideoCard = ({
   movie,
@@ -19,6 +23,8 @@ const VideoCard = ({
   openPage: (page: string) => void;
   onNotInterested: (id: string) => void;
 }) => {
+  const likes = useUserStore((store) => store.likes);
+
   const [thumbnail] = movie.files.filter(
     ({ name }) => name === "__ia_thumb.jpg",
   );
@@ -40,7 +46,10 @@ const VideoCard = ({
     >
       <Card className="bg-transparent text-primary border-secondary border-2 cursor-pointer">
         <CardHeader className="pb-0 flex-col items-start">
-          <div className="flex w-full">
+          <div className="flex w-full gap-2 items-center">
+            {likes.includes(identifier) && (
+              <HeartIcon className="size-5 text-red-400" />
+            )}
             <h4
               className="text-medium uppercase font-bold truncate grow text-left"
               title={title}

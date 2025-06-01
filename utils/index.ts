@@ -30,7 +30,22 @@ export const topicParser = (topic: string) => {
       return "Art & Music";
     case "stream_only":
       return "Stream Only";
+    case "prelinger":
+      return "Prelinger";
     default:
       return topic;
+  }
+};
+
+export const processArrayOrString = <T>(
+  value: T[] | T | undefined,
+  processor: (item: T) => void,
+): void => {
+  if (!value) return;
+
+  if (Array.isArray(value)) {
+    value.forEach(processor);
+  } else {
+    processor(value);
   }
 };

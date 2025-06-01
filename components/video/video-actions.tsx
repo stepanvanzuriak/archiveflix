@@ -1,5 +1,7 @@
 "use client";
 
+import clsx from "clsx";
+import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dropdown,
@@ -7,40 +9,36 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@heroui/dropdown";
-import { useCallback } from "react";
+import { Button } from "@heroui/button";
+
+import { HeartIcon, HideIcon } from "../layout/icons";
 
 import { useUserStore } from "@/stores/user-store-provider";
-
-const HideIcon = () => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      className="size-6"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
-      />
-    </svg>
-  );
-};
 
 export default function VideoActions({
   identifier,
   onNotInterested,
   redirectOnNotInterested,
+  withExpandedVersion,
 }: {
   identifier: string;
   onNotInterested?: (id: string) => void;
   redirectOnNotInterested?: boolean;
+  withExpandedVersion?: boolean;
 }) {
   const router = useRouter();
   const notInterested = useUserStore((store) => store.addToFilter);
+  const likeVideo = useUserStore((store) => store.addToLikes);
+  const notInterestedFilter = useUserStore((store) => store.filter);
+  const likes = useUserStore((state) => state.likes);
+
+  const isNotInterested = useMemo(() => {
+    return notInterestedFilter.includes(identifier);
+  }, [identifier, notInterestedFilter]);
+
+  const isLiked = useMemo(() => {
+    return likes.includes(identifier);
+  }, [identifier, likes]);
 
   const handleDropDown = useCallback(async (key: string, id: string) => {
     if (key === "not_interested") {
@@ -50,38 +48,99 @@ export default function VideoActions({
       }
 
       if (redirectOnNotInterested) {
-        router.push("/");
+        setTimeout(() => {
+          router.push("/");
+        }, 100);
       }
+    } else if (key === "like") {
+      likeVideo(id);
     }
   }, []);
 
   return (
-    <Dropdown>
-      <DropdownTrigger className="text-primary min-w-[24px]">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="size-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
-          />
-        </svg>
-      </DropdownTrigger>
+    <>
+      <Dropdown>
+        <DropdownTrigger className="text-primary min-w-[24px]">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className={clsx("size-6 cursor-pointer", {
+              "sm:hidden": withExpandedVersion,
+            })}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
+            />
+          </svg>
+        </DropdownTrigger>
 
-      <DropdownMenu
-        aria-label="Static Actions"
-        onAction={(key) => handleDropDown(key as string, identifier)}
-      >
-        <DropdownItem startContent={<HideIcon />} key="not_interested">
-          Not interested
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+        <DropdownMenu
+          aria-label="Static Actions"
+          onAction={(key) => handleDropDown(key as string, identifier)}
+        >
+          <DropdownItem
+            startContent={
+              <HeartIcon
+                className={clsx({
+                  "text-red-400": isLiked,
+                })}
+              />
+            }
+            key="like"
+          >
+            Like
+          </DropdownItem>
+          <DropdownItem
+            startContent={
+              <HideIcon
+                className={clsx({
+                  "text-yellow-400": isNotInterested,
+                })}
+              />
+            }
+            key="not_interested"
+          >
+            Not interested
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+
+      {withExpandedVersion && (
+        <div className="sm:flex hidden gap-4">
+          <Button
+            aria-label="Not interested"
+            size="sm"
+            variant="bordered"
+            radius="md"
+            isIconOnly
+            className={clsx({
+              "border-red-400": isLiked,
+            })}
+            onPress={() => handleDropDown("like", identifier)}
+          >
+            <HeartIcon />
+          </Button>
+
+          <Button
+            aria-label="Not interested"
+            size="sm"
+            variant="bordered"
+            radius="md"
+            isIconOnly
+            className={clsx({
+              "border-yellow-400": isNotInterested,
+            })}
+            onPress={() => handleDropDown("not_interested", identifier)}
+          >
+            <HideIcon />
+          </Button>
+        </div>
+      )}
+    </>
   );
 }

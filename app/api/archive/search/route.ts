@@ -9,14 +9,17 @@ export async function GET(req: NextRequest) {
   const rows = req.nextUrl.searchParams.get("rows");
   const title = req.nextUrl.searchParams.get("title");
 
-  const q = [
+  const queryParts = [
     collection ? `collection:(${collection})` : "",
     subject ? `subject:(${subject})` : "",
     creator ? `creator:(${creator})` : "",
     title ? `title:(${title})` : "",
-  ]
-    .filter(Boolean)
-    .join(" AND ");
+  ].filter(Boolean);
+
+  // Add the filter to exclude collections
+  queryParts.push("NOT mediatype:collection");
+
+  const q = queryParts.join(" AND ");
 
   const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=${rows}&page=${page}&output=json&sort[]=${encodeURIComponent(sort as string)}`;
 

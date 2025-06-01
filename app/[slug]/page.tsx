@@ -24,16 +24,23 @@ export default async function MoviePage({
   });
 
   const { title, description, collection, identifier } = item.metadata;
+  const collectionList: string[] = Array.isArray(collection)
+    ? collection
+    : [collection];
 
   return (
     <div>
       <Player slug={slug} />
-      <div className="flex items-center mb-4 gap-4">
+      <div className="flex items-center mb-4 gap-4 sm:justify-between">
         <h1 className="text-2xl text-primary">{title as string}</h1>
-        <VideoActions identifier={identifier} redirectOnNotInterested />
+        <VideoActions
+          withExpandedVersion
+          identifier={identifier}
+          redirectOnNotInterested
+        />
       </div>
       <div className="mb-4">
-        {(collection as string[])
+        {collectionList
           .filter((topic) => !NOT_TOPIC.includes(topic))
           .map((topic) => (
             <Link
@@ -48,7 +55,11 @@ export default async function MoviePage({
 
       <div
         className="injected mb-4 text-pretty"
-        dangerouslySetInnerHTML={{ __html: description as string }}
+        dangerouslySetInnerHTML={{
+          __html: description
+            .replace(/style="[^"]*"/g, "")
+            .replace(/color="[^"]*"/g, "") as string,
+        }}
       />
 
       <Details

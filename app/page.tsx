@@ -2,6 +2,7 @@ import clsx from "clsx";
 
 import CollectionView from "@/components/collection/collection-view";
 import HomeSearch from "@/components/layout/home-search";
+import HomeRecommendations from "@/components/layout/home-recommendations";
 
 export default async function Home({
   searchParams,
@@ -16,7 +17,14 @@ export default async function Home({
         "items-center justify-center": !params.search,
       })}
     >
-      {params.search ? <CollectionView params={params} /> : <HomeSearch />}
+      {params.search ? (
+        <CollectionView params={params} />
+      ) : (
+        <>
+          <HomeSearch />
+          <HomeRecommendations />
+        </>
+      )}
     </section>
   );
 }
