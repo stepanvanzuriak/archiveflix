@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button } from "@heroui/button";
+import { Button, ButtonGroup } from "@heroui/button";
 import { Input } from "@heroui/input";
 import {
   Dropdown,
@@ -153,43 +153,44 @@ export default function ListControls() {
         onChange={(event) => onSearch(event.target.value)}
       />
 
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-2 items-center">
         <FilterSelect onChange={onChangeFilter} />
 
-        <div className="flex gap-2 items-center px-2 py-1 rounded-lg">
-          <span>Sort by</span>
-          <Button
-            isIconOnly
-            className="text-primary"
-            variant="ghost"
-            onPress={() =>
-              router.push(
-                order === "desc"
-                  ? createSortPageURL(key, "asc")
-                  : createSortPageURL(key, "desc"),
-              )
-            }
-          >
-            {order === "desc" ? <ArrowDown /> : <ArrowUp />}
-          </Button>
-          <Dropdown>
-            <DropdownTrigger>
-              <Button variant="bordered">
-                {items.find((item) => item.key === key)?.label}
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              onAction={(key) =>
-                router.push(createSortPageURL(key as string, order))
+        <div>
+          <ButtonGroup variant="flat">
+            <Button
+              isIconOnly
+              className="text-primary"
+              variant="ghost"
+              onPress={() =>
+                router.push(
+                  order === "desc"
+                    ? createSortPageURL(key, "asc")
+                    : createSortPageURL(key, "desc"),
+                )
               }
-              aria-label="Dynamic Actions"
-              items={items}
             >
-              {(item) => (
-                <DropdownItem key={item.key}>{item.label}</DropdownItem>
-              )}
-            </DropdownMenu>
-          </Dropdown>
+              {order === "desc" ? <ArrowDown /> : <ArrowUp />}
+            </Button>
+            <Dropdown>
+              <DropdownTrigger>
+                <Button variant="bordered">
+                  {items.find((item) => item.key === key)?.label}
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                onAction={(key) =>
+                  router.push(createSortPageURL(key as string, order))
+                }
+                aria-label="Dynamic Actions"
+                items={items}
+              >
+                {(item) => (
+                  <DropdownItem key={item.key}>{item.label}</DropdownItem>
+                )}
+              </DropdownMenu>
+            </Dropdown>
+          </ButtonGroup>
         </div>
       </div>
     </div>

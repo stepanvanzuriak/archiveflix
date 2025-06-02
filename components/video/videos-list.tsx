@@ -41,6 +41,7 @@ const VideosList = ({
     response: {
       docs: { identifier: string }[];
       numFound: number;
+      afterRevalidation?: boolean;
     };
   }>(
     getItems(
@@ -52,9 +53,9 @@ const VideosList = ({
       {
         sort: currentSort,
         rows: adjustedRows.toString(),
-      }
+      },
     ),
-    fetcher
+    fetcher,
   );
 
   const filterMovies = useCallback(
@@ -78,7 +79,7 @@ const VideosList = ({
 
       return true;
     },
-    [filter, likes, notInterestedList, watched]
+    [filter, likes, notInterestedList, watched],
   );
 
   const moviesIds = useMemo(() => {
@@ -99,7 +100,7 @@ const VideosList = ({
     if (shouldFetchMore) {
       const newRowCount = Math.min(
         adjustedRows + DESIRED_MOVIES_COUNT,
-        100 // Cap to prevent too large requests
+        100, // Cap to prevent too large requests
       );
 
       // Trigger a new fetch with more rows
@@ -135,6 +136,7 @@ const VideosList = ({
       description: string;
       title: string;
       identifier: string;
+      afterRevalidation?: boolean;
     };
   }>((index) => getItem(moviesIds[index]), fetcher, {
     initialSize: moviesIds.length,
@@ -144,17 +146,27 @@ const VideosList = ({
     (id: string) => {
       mutateItems(movies.filter((item) => item.metadata.identifier !== id));
     },
-    [mutateItems, movies]
+    [mutateItems, movies],
   );
 
   const mutations = useCallback(
-    async () => {
-      await mutateItems([]);
-      await mutate({ response: { docs: [], numFound: 0 } });
+    () => {
+      mutate({ response: { docs: [], numFound: 0, afterRevalidation: true } });
+      mutateItems([
+        {
+          files: [],
+          metadata: {
+            title: "",
+            description: "",
+            identifier: "",
+            afterRevalidation: true,
+          },
+        },
+      ]);
     },
     // Skipped this as it caused extra renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [],
   );
 
   useEffect(() => {
@@ -167,11 +179,16 @@ const VideosList = ({
     mutations();
   }, [filter, mutations]);
 
-  if (isLoading || moviesLoading) {
+  const filteredMovies = movies.filter((movie) => movie?.metadata?.identifier);
+
+  if (
+    isLoading ||
+    moviesLoading ||
+    data?.response.afterRevalidation ||
+    filteredMovies[0].metadata.afterRevalidation
+  ) {
     return <Loading className="h-full" />;
   }
-
-  const filteredMovies = movies.filter((movie) => movie?.metadata?.identifier);
 
   // Dynamic grid class based on item count
   const getGridClass = (itemCount: number) => {
@@ -198,7 +215,7 @@ const VideosList = ({
                 key={movie.metadata.identifier}
                 openPage={openPage}
                 isNotInterested={notInterestedList.includes(
-                  movie.metadata.identifier
+                  movie.metadata.identifier,
                 )}
                 isLiked={likes.includes(movie.metadata.identifier)}
                 isWatched={watched.includes(movie.metadata.identifier)}
