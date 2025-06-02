@@ -4,7 +4,7 @@ import { Chip } from "@heroui/chip";
 import { fetcher } from "@/service/api";
 import Player from "@/components/video/player";
 import Details from "@/components/video/details";
-import { topicParser } from "@/utils";
+import { cleanHTML, topicParser } from "@/utils";
 import VideoActions from "@/components/video/video-actions";
 
 const NOT_TOPIC = ["no-preview", "more_animation", "deemphasize", ""];
@@ -56,9 +56,7 @@ export default async function MoviePage({
       <div
         className="injected mb-4 text-pretty"
         dangerouslySetInnerHTML={{
-          __html: description
-            .replace(/style="[^"]*"/g, "")
-            .replace(/color="[^"]*"/g, "") as string,
+          __html: cleanHTML(description),
         }}
       />
 

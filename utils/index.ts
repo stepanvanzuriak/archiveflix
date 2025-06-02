@@ -49,3 +49,6 @@ export const processArrayOrString = <T>(
     processor(value);
   }
 };
+
+export const cleanHTML = (html: string) =>
+  html.replace(/style="[^"]*"/g, "").replace(/color="[^"]*"/g, "");

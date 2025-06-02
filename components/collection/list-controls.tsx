@@ -3,7 +3,12 @@
 import { useCallback } from "react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import Link from "next/link";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+} from "@heroui/dropdown";
 import { debounce } from "lodash";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -47,60 +52,19 @@ function ArrowUp() {
   );
 }
 
-const SORT_ORDERS = {
-  num_reviews_desc: "num_reviews desc",
-  num_reviews_asc: "num_reviews asc",
-  avg_rating_desc: "avg_rating desc",
-  avg_rating_asc: "avg_rating asc",
-};
-
-function Control({
-  createSortPageURL,
-  currentSort,
-  ascState,
-  descState,
-  name,
-  mobileName,
-}: {
-  mobileName: string;
-  name: string;
-  ascState: string;
-  descState: string;
-  currentSort: string;
-  createSortPageURL: (url: string) => string;
-}) {
-  if (currentSort !== ascState && currentSort !== descState) {
-    return (
-      <Link href={createSortPageURL(descState)}>
-        <Button
-          color="primary"
-          className="bg-transparent border-primary border-2 text-primary"
-        >
-          <span className="hidden sm:inline">{name}</span>
-          <span className="sm:hidden inline">{mobileName}</span>
-        </Button>
-      </Link>
-    );
-  }
-
-  const nextSort = currentSort === ascState ? descState : ascState;
-
-  return (
-    <Link href={createSortPageURL(nextSort)}>
-      <Button
-        color="primary"
-        className="bg-transparent border-primary border-2 text-primary"
-      >
-        <span className="hidden sm:flex items-center gap-2">
-          {name} {currentSort === ascState ? <ArrowUp /> : <ArrowDown />}
-        </span>
-        <span className="sm:hidden flex items-center gap-2">
-          {mobileName} {currentSort === ascState ? <ArrowUp /> : <ArrowDown />}
-        </span>
-      </Button>
-    </Link>
-  );
-}
+const items = [
+  {
+    key: "num_reviews",
+    label: "Number of review",
+  },
+  {
+    key: "avg_rating",
+    label: "Rating",
+  },
+  { key: "num_favorites", label: "Number of favorites" },
+  { key: "addeddate", label: "Added date" },
+  { key: "random", label: "Random" },
+];
 
 export default function ListControls() {
   const pathname = usePathname();
@@ -110,10 +74,12 @@ export default function ListControls() {
     (searchParams.get("sort") as string) || "num_reviews desc";
   const currentSearch = searchParams.get("search");
 
-  const createSortPageURL = (sortOrder: string) => {
+  const [key, order] = currentSort.split(" ");
+
+  const createSortPageURL = (sortKey: string, sortOrder: string) => {
     const params = new URLSearchParams(searchParams);
 
-    params.set("sort", sortOrder);
+    params.set("sort", `${sortKey} ${sortOrder}`);
 
     return `${pathname}?${params.toString()}`;
   };
@@ -159,23 +125,38 @@ export default function ListControls() {
         defaultValue={currentSearch || ""}
         onChange={(event) => onSearch(event.target.value)}
       />
-      <div className="flex gap-4">
-        <Control
-          name="Number of reviews"
-          mobileName="# reviews"
-          createSortPageURL={createSortPageURL}
-          currentSort={currentSort}
-          ascState={SORT_ORDERS.num_reviews_asc}
-          descState={SORT_ORDERS.num_reviews_desc}
-        />
-        <Control
-          name="Average user rating"
-          mobileName="Avg. user rating"
-          createSortPageURL={createSortPageURL}
-          currentSort={currentSort}
-          ascState={SORT_ORDERS.avg_rating_asc}
-          descState={SORT_ORDERS.avg_rating_desc}
-        />
+      <div className="flex gap-2 items-center">
+        <span>Sort by</span>
+        <Button
+          isIconOnly
+          className="text-primary"
+          variant="ghost"
+          onPress={() =>
+            router.push(
+              order === "desc"
+                ? createSortPageURL(key, "asc")
+                : createSortPageURL(key, "desc"),
+            )
+          }
+        >
+          {order === "desc" ? <ArrowDown /> : <ArrowUp />}
+        </Button>
+        <Dropdown>
+          <DropdownTrigger>
+            <Button variant="bordered">
+              {items.find((item) => item.key === key)?.label}
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu
+            onAction={(key) =>
+              router.push(createSortPageURL(key as string, order))
+            }
+            aria-label="Dynamic Actions"
+            items={items}
+          >
+            {(item) => <DropdownItem key={item.key}>{item.label}</DropdownItem>}
+          </DropdownMenu>
+        </Dropdown>
       </div>
     </div>
   );

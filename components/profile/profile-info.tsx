@@ -21,8 +21,8 @@ export default function UserProfile() {
   const removeWatched = useUserStore((store) => store.setWatched);
 
   return (
-    <div className="flex gap-8">
-      <div className="w-1/2">
+    <div className="flex sm:flex-row flex-col gap-8">
+      <div className="sm:w-1/2">
         <h2 className="text-2xl mb-4">Likes</h2>
         <Table aria-label="Not interested" className="mb-8">
           <TableHeader>
@@ -60,7 +60,7 @@ export default function UserProfile() {
         </Table>
       </div>
 
-      <div className="w-1/2">
+      <div className="sm:w-1/2">
         <h2 className="text-2xl mb-4">Not interested</h2>
         <Table aria-label="Not interested">
           <TableHeader>

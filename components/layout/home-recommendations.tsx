@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { Button } from "@heroui/button";
 import { sampleSize } from "lodash";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -12,7 +13,7 @@ import VideoCard from "../video/video-card";
 import { useUserStore } from "@/stores/user-store-provider";
 import { COMMON_WORDS } from "@/constants";
 import { fetcher, getItem, getItems } from "@/service/api";
-import { processArrayOrString } from "@/utils";
+import { cleanHTML, processArrayOrString } from "@/utils";
 
 interface MovieData {
   files: { name: string }[];
@@ -70,14 +71,8 @@ const CATEGORIES: RecommendationCategory[] = [
     collection: "animationandcartoons",
     sort: "downloads desc",
   },
-  {
-    name: "Recently Added",
-    collection: "feature_films",
-    sort: "addeddate desc",
-  },
 ];
 
-// Utility functions
 const extractKeywords = (text: string): string[] => {
   return text
     .toLowerCase()
@@ -114,36 +109,30 @@ const extractUserPreferences = (likedMovies: MovieData[]): UserPreferences => {
   validLikedMovies.forEach((movie) => {
     const { metadata } = movie;
 
-    // Extract creators
     if (metadata.creator) {
       preferences.creators.add(metadata.creator.toLowerCase());
     }
 
-    // Extract subjects/topics
     processArrayOrString(metadata.subject, (subject) => {
       preferences.subjects.add(subject.toLowerCase());
     });
 
-    // Extract genres
     if (metadata.genre) {
       metadata.genre.forEach((genre) =>
         preferences.genres.add(genre.toLowerCase()),
       );
     }
 
-    // Extract languages
     processArrayOrString(metadata.language, (lang) => {
       preferences.languages.add(lang.toLowerCase());
     });
 
-    // Extract years
     if (metadata.date) {
       const year = parseInt(metadata.date.substring(0, 4));
 
       if (!isNaN(year)) preferences.years.add(year);
     }
 
-    // Extract keywords from titles and descriptions
     const titleWords = extractKeywords(metadata.title);
     const descWords = extractKeywords(metadata.description || "");
 
@@ -163,12 +152,10 @@ const calculateMovieScore = (
   let score = 0;
   const metadata = movie.metadata;
 
-  // Boost if directly in likes list
   if (likes.includes(metadata.identifier)) {
     score += 100;
   }
 
-  // Creator matching (highest weight)
   if (metadata.creator) {
     const movieCreator = metadata.creator.toLowerCase();
 
@@ -182,7 +169,6 @@ const calculateMovieScore = (
     });
   }
 
-  // Subject/genre matching
   processArrayOrString(metadata.subject, (subject) => {
     if (userPreferences.subjects.has(subject.toLowerCase())) {
       score += 60;
@@ -197,14 +183,12 @@ const calculateMovieScore = (
     });
   }
 
-  // Language preference
   processArrayOrString(metadata.language, (lang) => {
     if (userPreferences.languages.has(lang.toLowerCase())) {
       score += 30;
     }
   });
 
-  // Year preference (prefer similar time periods)
   if (metadata.date) {
     const movieYear = parseInt(metadata.date.substring(0, 4));
 
@@ -219,7 +203,6 @@ const calculateMovieScore = (
     }
   }
 
-  // Keyword matching in title and description
   const titleWords = extractKeywords(metadata.title);
   const descWords = extractKeywords(metadata.description || "");
 
@@ -263,7 +246,7 @@ const findFeaturedMovie = (
     .sort((a, b) => b.score - a.score);
 
   if (scoredMovies[0].score > 0) {
-    scoredMovies[0].movie;
+    return scoredMovies[0].movie;
   }
 
   return null;
@@ -408,12 +391,12 @@ const CategoryRow: React.FC<{
   if (isLoading) {
     return (
       <div className="mb-8">
-        <h2 className="text-white text-xl font-bold mb-4">{title}</h2>
+        <h2 className="text-primary text-xl font-bold mb-4">{title}</h2>
         <div className="flex space-x-4 overflow-x-hidden">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="w-64 h-44 bg-secondary rounded-lg animate-pulse flex-shrink-0"
+              className="w-64 h-44 rounded-lg animate-pulse flex-shrink-0"
             />
           ))}
         </div>
@@ -425,8 +408,8 @@ const CategoryRow: React.FC<{
 
   return (
     <div className="mb-8">
-      <h2 className="text-white text-xl font-bold mb-4">{title}</h2>
-      <div className="relative group">
+      <h2 className="text-primary text-xl font-bold mb-4">{title}</h2>
+      <div className="relative">
         <div className="overflow-x-auto scrollbar-hide">
           <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
             {sortedMovies.map((movie) => (
@@ -452,17 +435,14 @@ const HomeRecommendations: React.FC = () => {
   const [featuredMovie, setFeaturedMovie] = useState<MovieData | null>(null);
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
 
-  // Get user preferences from store
   const likes = useUserStore((store) => store.likes);
   const filter = useUserStore((store) => store.filter);
   const watched = useUserStore((store) => store.watched);
 
-  // Get 15 random likes using lodash
   const randomLikes = useMemo(() => {
     return sampleSize(likes, Math.min(30, likes.length));
   }, [likes]);
 
-  // Fetch liked movies data
   const { data: likedMovies = [], isLoading: likesLoading } =
     useSWRInfinite<MovieData>(
       (index) => (randomLikes[index] ? getItem(randomLikes[index]) : null),
@@ -473,17 +453,10 @@ const HomeRecommendations: React.FC = () => {
       },
     );
 
-  // Process liked movies to extract preferences
   const userPreferences = useMemo(() => {
     return extractUserPreferences(likedMovies);
   }, [likedMovies]);
 
-  // Initialize active categories
-  useEffect(() => {
-    setActiveCategories(CATEGORIES.map((cat) => cat.name));
-  }, []);
-
-  // Use hooks for all categories at the top level
   const filteredItems = Array.from(new Set([...filter, ...likes, ...watched]));
   const categoryData = {
     "Popular Classic Films": useCategoryData(
@@ -501,11 +474,6 @@ const HomeRecommendations: React.FC = () => {
       activeCategories.includes("Animation Collection"),
       filteredItems,
     ),
-    "Recently Added": useCategoryData(
-      CATEGORIES[3],
-      activeCategories.includes("Recently Added"),
-      filteredItems,
-    ),
   };
 
   const openPage = useCallback(
@@ -515,7 +483,18 @@ const HomeRecommendations: React.FC = () => {
     [router],
   );
 
-  // Set featured movie from highest scored movie across all categories
+  // Check if any category is still loading
+  const isAnyLoading = useMemo(
+    () =>
+      Object.values(categoryData).some((data) => data.isLoading) ||
+      likesLoading,
+    [categoryData, likesLoading],
+  );
+
+  useEffect(() => {
+    setActiveCategories(CATEGORIES.map((cat) => cat.name));
+  }, []);
+
   useEffect(() => {
     if (!featuredMovie && !likesLoading) {
       const featured = findFeaturedMovie(categoryData, userPreferences, likes);
@@ -526,51 +505,37 @@ const HomeRecommendations: React.FC = () => {
     }
   }, [categoryData, featuredMovie, userPreferences, likes, likesLoading]);
 
-  // Check if any category is still loading
-  const isAnyLoading = useMemo(
-    () =>
-      Object.values(categoryData).some((data) => data.isLoading) ||
-      likesLoading,
-    [categoryData, likesLoading],
-  );
+  const [thumbnail] = featuredMovie
+    ? featuredMovie.files.filter(({ name }) => name === "__ia_thumb.jpg")
+    : [];
 
   if (isAnyLoading && !featuredMovie) {
     return <Loading className="h-full" />;
   }
 
-  const [thumbnail] = featuredMovie
-    ? featuredMovie.files.filter(({ name }) => name === "__ia_thumb.jpg")
-    : [];
-
   return (
-    <div className="flex-grow bg-black w-full">
-      {/* Featured Movie Hero Section */}
+    <div className="flex-grow w-full">
       {featuredMovie && (
-        <div className="relative h-96 mb-8 overflow-hidden">
-          {/* Background Image */}
+        <div className="relative h-96 mb-8 overflow-hidden rounded-md">
           {thumbnail && (
             <div className="absolute inset-0">
               <Image
                 fill
                 priority
                 alt={featuredMovie.metadata.title}
-                className="object-cover object-center rounded-md"
+                className="object-cover object-center grayscale blur-sm"
                 sizes="100vw"
                 src={`https://archive.org/download/${featuredMovie.metadata.identifier}/${thumbnail.name}`}
               />
-              {/* Dark overlay for better text readability */}
-              <div className="absolute inset-0 bg-black bg-opacity-60" />
             </div>
           )}
 
-          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10" />
 
           <div className="relative z-20 h-full flex items-center">
             <div className="flex items-center gap-8 px-12 w-full">
-              {/* Movie Poster/Thumbnail */}
               {thumbnail && (
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 hidden sm:block">
                   <div className="relative w-48 h-72 rounded-lg overflow-hidden shadow-2xl">
                     <Image
                       fill
@@ -584,13 +549,11 @@ const HomeRecommendations: React.FC = () => {
                 </div>
               )}
 
-              {/* Movie Info */}
               <div className="flex-1 max-w-2xl">
-                <h1 className="text-white text-5xl font-bold mb-4 leading-tight">
+                <h3 className="text-white text-4xl font-bold mb-4 leading-tight">
                   {featuredMovie.metadata.title}
-                </h1>
+                </h3>
 
-                {/* Movie metadata */}
                 <div className="flex items-center gap-4 mb-4 text-gray-300">
                   {featuredMovie.metadata.date && (
                     <span className="text-sm">
@@ -610,33 +573,18 @@ const HomeRecommendations: React.FC = () => {
                 <p
                   className="text-gray-200 text-lg mb-6 line-clamp-3 leading-relaxed"
                   dangerouslySetInnerHTML={{
-                    __html:
-                      featuredMovie.metadata.description.replace(
-                        /style="[^"]*"/g,
-                        "",
-                      ) || "Discover this amazing content from Archive.org",
+                    __html: cleanHTML(featuredMovie.metadata.description),
                   }}
                 />
 
-                {/* Action Buttons */}
                 <div className="flex gap-4">
-                  <button
-                    onClick={() => openPage(featuredMovie.metadata.identifier)}
-                    className="bg-white text-black px-8 py-3 rounded-md font-semibold hover:bg-gray-200 transition-colors duration-200 flex items-center gap-2"
+                  <Button
+                    onPress={() => openPage(featuredMovie.metadata.identifier)}
+                    color="secondary"
+                    size="lg"
                   >
-                    <svg
-                      className="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Watch Now
-                  </button>
+                    Watch
+                  </Button>
                 </div>
               </div>
             </div>
@@ -644,7 +592,6 @@ const HomeRecommendations: React.FC = () => {
         </div>
       )}
 
-      {/* Recommendation Categories */}
       <div>
         {CATEGORIES.map((category) => {
           const data = categoryData[category.name as keyof typeof categoryData];
