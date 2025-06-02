@@ -29,12 +29,12 @@ const VideosList = ({
   const filter = (searchParams.get("filter") as string) || "";
   const router = useRouter();
 
-  const notInterstedList = useUserStore((store) => store.filter);
+  const notInterestedList = useUserStore((store) => store.filter);
   const likes = useUserStore((store) => store.likes);
   const watched = useUserStore((store) => store.watched);
 
   // Calculate how many extra rows we might need based on filter list size
-  const estimatedExtraRows = notInterstedList.length;
+  const estimatedExtraRows = notInterestedList.length;
   const adjustedRows = DESIRED_MOVIES_COUNT + estimatedExtraRows;
 
   const { data, mutate, isLoading } = useSWR<{
@@ -52,35 +52,33 @@ const VideosList = ({
       {
         sort: currentSort,
         rows: adjustedRows.toString(),
-      },
+      }
     ),
-    fetcher,
+    fetcher
   );
 
   const filterMovies = useCallback(
     ({ identifier }: { identifier: string }) => {
       const filters = filter.split(",");
-      const isWatchedFilter = filters.includes("watched");
-      const isLiked = filters.includes("liked");
-      const notInterested = filters.includes("not_interested");
 
-      let result = true;
-
-      if (notInterested) {
-        result = !notInterstedList.includes(identifier);
+      if (filters.includes("watched") && watched.includes(identifier)) {
+        return false;
       }
 
-      if (isWatchedFilter) {
-        result = !watched.includes(identifier);
+      if (filters.includes("liked") && likes.includes(identifier)) {
+        return false;
       }
 
-      if (isLiked) {
-        result = !likes.includes(identifier);
+      if (
+        filters.includes("not_interested") &&
+        notInterestedList.includes(identifier)
+      ) {
+        return false;
       }
 
-      return result;
+      return true;
     },
-    [filter, likes, notInterstedList, watched],
+    [filter, likes, notInterestedList, watched]
   );
 
   const moviesIds = useMemo(() => {
@@ -91,7 +89,7 @@ const VideosList = ({
       .map(({ identifier }) => identifier);
 
     return movies.slice(0, DESIRED_MOVIES_COUNT);
-  }, [data, filterMovies]);
+  }, [data?.response.docs, filterMovies]);
 
   // Refetch with more rows if needed
   useEffect(() => {
@@ -101,7 +99,7 @@ const VideosList = ({
     if (shouldFetchMore) {
       const newRowCount = Math.min(
         adjustedRows + DESIRED_MOVIES_COUNT,
-        100, // Cap to prevent too large requests
+        100 // Cap to prevent too large requests
       );
 
       // Trigger a new fetch with more rows
@@ -146,15 +144,18 @@ const VideosList = ({
     (id: string) => {
       mutateItems(movies.filter((item) => item.metadata.identifier !== id));
     },
-    [mutateItems, movies],
+    [mutateItems, movies]
   );
 
-  const mutations = useCallback(async () => {
-    await mutate({ response: { docs: [], numFound: 0 } });
-    await mutateItems([]);
-    // Skiped this as it caused extra renders
+  const mutations = useCallback(
+    async () => {
+      await mutateItems([]);
+      await mutate({ response: { docs: [], numFound: 0 } });
+    },
+    // Skipped this as it caused extra renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    []
+  );
 
   useEffect(() => {
     if (currentSearch) {
@@ -196,6 +197,9 @@ const VideosList = ({
                 onNotInterested={onNotInterested}
                 key={movie.metadata.identifier}
                 openPage={openPage}
+                isNotInterested={notInterestedList.includes(
+                  movie.metadata.identifier
+                )}
                 isLiked={likes.includes(movie.metadata.identifier)}
                 isWatched={watched.includes(movie.metadata.identifier)}
               />

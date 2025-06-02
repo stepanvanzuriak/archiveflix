@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 
-import { HeartIcon, Watched } from "../layout/icons";
+import { HeartIcon, HideIcon, Watched } from "../layout/icons";
 
 import VideoActions from "./video-actions";
 
@@ -11,6 +11,7 @@ const VideoCard = ({
   onNotInterested,
   isWatched,
   isLiked,
+  isNotInterested,
 }: {
   movie: {
     files: { name: string }[];
@@ -22,11 +23,12 @@ const VideoCard = ({
   };
   isWatched: boolean;
   isLiked: boolean;
+  isNotInterested: boolean;
   openPage: (page: string) => void;
   onNotInterested: (id: string) => void;
 }) => {
   const [thumbnail] = movie.files.filter(
-    ({ name }) => name === "__ia_thumb.jpg",
+    ({ name }) => name === "__ia_thumb.jpg"
   );
 
   const description = movie.metadata.description;
@@ -51,6 +53,7 @@ const VideoCard = ({
         <div className="flex w-full gap-2 items-center">
           {isLiked && <HeartIcon className="size-5 text-red-400" />}
           {isWatched && <Watched className="size-5 text-blue-400" />}
+          {isNotInterested && <HideIcon className="size-5 text-yellow-400" />}
           <h4
             className="text-medium uppercase font-bold truncate grow text-left"
             title={title}
