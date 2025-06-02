@@ -416,6 +416,7 @@ const CategoryRow: React.FC<{
               <VideoCard
                 isLiked={false}
                 isWatched={false}
+                isNotInterested={false}
                 key={movie.metadata.identifier}
                 onNotInterested={onNotInterested}
                 movie={movie}
