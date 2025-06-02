@@ -1,7 +1,8 @@
 {
   "name": "archiveflix",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
+  "license": "MIT",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
