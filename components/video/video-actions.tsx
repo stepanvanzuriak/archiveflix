@@ -44,26 +44,36 @@ export default function VideoActions({
 
   const isWatched = useMemo(() => {
     return watched.includes(identifier);
-  }, [watched]);
+  }, [watched, identifier]);
 
-  const handleDropDown = useCallback(async (key: string, id: string) => {
-    if (key === "not_interested") {
-      notInterested(id);
-      if (onNotInterested) {
-        onNotInterested(id);
-      }
+  const handleDropDown = useCallback(
+    async (key: string, id: string) => {
+      if (key === "not_interested") {
+        notInterested(id);
+        if (onNotInterested) {
+          onNotInterested(id);
+        }
 
-      if (redirectOnNotInterested) {
-        setTimeout(() => {
-          router.push("/");
-        }, 100);
+        if (redirectOnNotInterested) {
+          setTimeout(() => {
+            router.push("/");
+          }, 100);
+        }
+      } else if (key === "like") {
+        likeVideo(id);
+      } else if (key === "watched") {
+        addToWatched(id);
       }
-    } else if (key === "like") {
-      likeVideo(id);
-    } else if (key === "watched") {
-      addToWatched(id);
-    }
-  }, []);
+    },
+    [
+      addToWatched,
+      likeVideo,
+      notInterested,
+      onNotInterested,
+      redirectOnNotInterested,
+      router,
+    ],
+  );
 
   return (
     <>

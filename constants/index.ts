@@ -75,3 +75,5 @@ export const COMMON_WORDS = new Set([
   "too",
   "use",
 ]);
+
+export const NOT_TOPIC = ["no-preview", "more_animation", "deemphasize", ""];

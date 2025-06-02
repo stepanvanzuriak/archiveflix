@@ -6,8 +6,10 @@ import Player from "@/components/video/player";
 import Details from "@/components/video/details";
 import { cleanHTML, topicParser } from "@/utils";
 import VideoActions from "@/components/video/video-actions";
+import { NOT_TOPIC } from "@/constants";
 
-const NOT_TOPIC = ["no-preview", "more_animation", "deemphasize", ""];
+const access = process.env.S3!;
+const secret = process.env.S3_SECRET!;
 
 export default async function MoviePage({
   params,
@@ -15,9 +17,6 @@ export default async function MoviePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
-  const access = process.env.S3!;
-  const secret = process.env.S3_SECRET!;
 
   const item = await fetcher(`https://archive.org/metadata/${slug}`, {
     Authorization: `LOW ${access}:${secret}`,

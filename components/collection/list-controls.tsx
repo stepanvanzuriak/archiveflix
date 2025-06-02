@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback } from "react";
+import clsx from "clsx";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import {
@@ -12,45 +13,7 @@ import {
 import { debounce } from "lodash";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { SearchIcon } from "../layout/icons";
-
-function ArrowDown() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      className="size-4"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3"
-      />
-    </svg>
-  );
-}
-
-function ArrowUp() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-      className="size-4"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M8.25 6.75 12 3m0 0 3.75 3.75M12 3v18"
-      />
-    </svg>
-  );
-}
+import { ArrowDown, ArrowUp, SearchIcon } from "../layout/icons";
 
 const items = [
   {
@@ -66,6 +29,60 @@ const items = [
   { key: "random", label: "Random" },
 ];
 
+const filters = [
+  { key: "watched", label: "Watched" },
+  { key: "liked", label: "Liked" },
+  { key: "not_interested", label: "Not interested" },
+];
+
+function FilterSelect({ onChange }: { onChange: (items: string[]) => void }) {
+  const searchParams = useSearchParams();
+  const filter = searchParams.get("filter") as string;
+  const [selectedKeys, setSelectedKeys] = useState(
+    new Set((filter || "not_interested").split(",")),
+  );
+
+  const selectedValue = useMemo(
+    () =>
+      Array.from(selectedKeys)
+        .map((key) => filters.find((item) => item.key === key)?.label)
+        .join(", "),
+    [selectedKeys],
+  );
+
+  useEffect(() => {
+    onChange(Array.from(selectedKeys));
+  }, [selectedKeys, onChange]);
+
+  return (
+    <Dropdown>
+      <DropdownTrigger>
+        <Button
+          className={clsx("capitalize w-40", {
+            "border-primary text-primary": Boolean(selectedValue),
+          })}
+          variant="bordered"
+        >
+          Change filters
+        </Button>
+      </DropdownTrigger>
+      <DropdownMenu
+        aria-label="Multiple selection example"
+        closeOnSelect
+        selectedKeys={selectedKeys}
+        selectionMode="multiple"
+        variant="flat"
+        // @ts-expect-error Complex type
+        onSelectionChange={setSelectedKeys}
+      >
+        {filters.map((item) => (
+          <DropdownItem key={item.key}>{item.label}</DropdownItem>
+        ))}
+      </DropdownMenu>
+    </Dropdown>
+  );
+}
+
 export default function ListControls() {
   const pathname = usePathname();
   const router = useRouter();
@@ -73,7 +90,6 @@ export default function ListControls() {
   const currentSort =
     (searchParams.get("sort") as string) || "num_reviews desc";
   const currentSearch = searchParams.get("search");
-
   const [key, order] = currentSort.split(" ");
 
   const createSortPageURL = (sortKey: string, sortOrder: string) => {
@@ -107,6 +123,17 @@ export default function ListControls() {
     [],
   );
 
+  const onChangeFilter = useCallback(
+    (filters: string[]) => {
+      const params = new URLSearchParams(searchParams);
+
+      params.set("filter", filters.join(","));
+
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
+
   return (
     <div className="flex sm:flex-row flex-col justify-between sm:gap-2 gap-4 text-primary">
       <Input
@@ -125,38 +152,45 @@ export default function ListControls() {
         defaultValue={currentSearch || ""}
         onChange={(event) => onSearch(event.target.value)}
       />
-      <div className="flex gap-2 items-center">
-        <span>Sort by</span>
-        <Button
-          isIconOnly
-          className="text-primary"
-          variant="ghost"
-          onPress={() =>
-            router.push(
-              order === "desc"
-                ? createSortPageURL(key, "asc")
-                : createSortPageURL(key, "desc"),
-            )
-          }
-        >
-          {order === "desc" ? <ArrowDown /> : <ArrowUp />}
-        </Button>
-        <Dropdown>
-          <DropdownTrigger>
-            <Button variant="bordered">
-              {items.find((item) => item.key === key)?.label}
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu
-            onAction={(key) =>
-              router.push(createSortPageURL(key as string, order))
+
+      <div className="flex gap-4 items-center">
+        <FilterSelect onChange={onChangeFilter} />
+
+        <div className="flex gap-2 items-center px-2 py-1 rounded-lg">
+          <span>Sort by</span>
+          <Button
+            isIconOnly
+            className="text-primary"
+            variant="ghost"
+            onPress={() =>
+              router.push(
+                order === "desc"
+                  ? createSortPageURL(key, "asc")
+                  : createSortPageURL(key, "desc"),
+              )
             }
-            aria-label="Dynamic Actions"
-            items={items}
           >
-            {(item) => <DropdownItem key={item.key}>{item.label}</DropdownItem>}
-          </DropdownMenu>
-        </Dropdown>
+            {order === "desc" ? <ArrowDown /> : <ArrowUp />}
+          </Button>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button variant="bordered">
+                {items.find((item) => item.key === key)?.label}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              onAction={(key) =>
+                router.push(createSortPageURL(key as string, order))
+              }
+              aria-label="Dynamic Actions"
+              items={items}
+            >
+              {(item) => (
+                <DropdownItem key={item.key}>{item.label}</DropdownItem>
+              )}
+            </DropdownMenu>
+          </Dropdown>
+        </div>
       </div>
     </div>
   );

@@ -458,23 +458,31 @@ const HomeRecommendations: React.FC = () => {
   }, [likedMovies]);
 
   const filteredItems = Array.from(new Set([...filter, ...likes, ...watched]));
-  const categoryData = {
-    "Popular Classic Films": useCategoryData(
-      CATEGORIES[0],
-      activeCategories.includes("Popular Classic Films"),
-      filteredItems,
-    ),
-    "Educational Content": useCategoryData(
-      CATEGORIES[1],
-      activeCategories.includes("Educational Content"),
-      filteredItems,
-    ),
-    "Animation Collection": useCategoryData(
-      CATEGORIES[2],
-      activeCategories.includes("Animation Collection"),
-      filteredItems,
-    ),
-  };
+
+  const popularData = useCategoryData(
+    CATEGORIES[0],
+    activeCategories.includes("Popular Classic Films"),
+    filteredItems,
+  );
+  const educationData = useCategoryData(
+    CATEGORIES[1],
+    activeCategories.includes("Educational Content"),
+    filteredItems,
+  );
+  const animationData = useCategoryData(
+    CATEGORIES[2],
+    activeCategories.includes("Animation Collection"),
+    filteredItems,
+  );
+
+  const categoryData = useMemo(
+    () => ({
+      "Popular Classic Films": popularData,
+      "Educational Content": educationData,
+      "Animation Collection": animationData,
+    }),
+    [popularData, educationData, animationData],
+  );
 
   const openPage = useCallback(
     (name: string) => {

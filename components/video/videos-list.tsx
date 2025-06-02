@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
@@ -25,7 +25,10 @@ const VideosList = ({
   collection?: string;
   currentSearch: string;
 }) => {
+  const searchParams = useSearchParams();
+  const filter = (searchParams.get("filter") as string) || "";
   const router = useRouter();
+
   const notInterstedList = useUserStore((store) => store.filter);
   const likes = useUserStore((store) => store.likes);
   const watched = useUserStore((store) => store.watched);
@@ -54,37 +57,46 @@ const VideosList = ({
     fetcher,
   );
 
+  const filterMovies = useCallback(
+    ({ identifier }: { identifier: string }) => {
+      const filters = filter.split(",");
+      const isWatchedFilter = filters.includes("watched");
+      const isLiked = filters.includes("liked");
+      const notInterested = filters.includes("not_interested");
+
+      let result = true;
+
+      if (notInterested) {
+        result = !notInterstedList.includes(identifier);
+      }
+
+      if (isWatchedFilter) {
+        result = !watched.includes(identifier);
+      }
+
+      if (isLiked) {
+        result = !likes.includes(identifier);
+      }
+
+      return result;
+    },
+    [filter, likes, notInterstedList, watched],
+  );
+
   const moviesIds = useMemo(() => {
     if (!data?.response.docs) return [];
 
     const movies = data.response.docs
-      .filter(({ identifier }) => !notInterstedList.includes(identifier))
+      .filter(filterMovies)
       .map(({ identifier }) => identifier);
 
-    if (movies.length <= DESIRED_MOVIES_COUNT) {
-      return movies;
-    }
-
-    return movies.slice(0, DESIRED_MOVIES_COUNT); // Ensure we don't show more than desired
-  }, [data, notInterstedList, currentSearch]);
-
-  // Check if we need to fetch more data
-  const needsMoreData = useMemo(() => {
-    if (!data?.response.docs) return false;
-
-    const filteredCount = data.response.docs.filter(
-      ({ identifier }) => !notInterstedList.includes(identifier),
-    ).length;
-
-    return (
-      filteredCount < DESIRED_MOVIES_COUNT &&
-      data.response.docs.length < data.response.numFound
-    );
-  }, [data, notInterstedList]);
+    return movies.slice(0, DESIRED_MOVIES_COUNT);
+  }, [data, filterMovies]);
 
   // Refetch with more rows if needed
   useEffect(() => {
-    const shouldFetchMore = needsMoreData && data && !currentSearch;
+    const shouldFetchMore =
+      moviesIds.length < DESIRED_MOVIES_COUNT && data && !currentSearch;
 
     if (shouldFetchMore) {
       const newRowCount = Math.min(
@@ -101,7 +113,7 @@ const VideosList = ({
       mutate(fetcher(newUrl), { revalidate: false });
     }
   }, [
-    needsMoreData,
+    moviesIds,
     data,
     adjustedRows,
     collection,
@@ -130,20 +142,29 @@ const VideosList = ({
     initialSize: moviesIds.length,
   });
 
-  const onNotInterested = useCallback((id: string) => {
-    mutateItems(movies.filter((item) => item.metadata.identifier !== id));
+  const onNotInterested = useCallback(
+    (id: string) => {
+      mutateItems(movies.filter((item) => item.metadata.identifier !== id));
+    },
+    [mutateItems, movies],
+  );
+
+  const mutations = useCallback(async () => {
+    await mutate({ response: { docs: [], numFound: 0 } });
+    await mutateItems([]);
+    // Skiped this as it caused extra renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    const mutations = async () => {
-      await mutate({ response: { docs: [], numFound: 0 } });
-      await mutateItems([]);
-    };
-
     if (currentSearch) {
       mutations();
     }
-  }, [currentSearch]);
+  }, [currentSearch, mutations]);
+
+  useEffect(() => {
+    mutations();
+  }, [filter, mutations]);
 
   if (isLoading || moviesLoading) {
     return <Loading className="h-full" />;
