@@ -589,7 +589,6 @@ const HomeRecommendations: React.FC = () => {
                 <div className="flex gap-4">
                   <Button
                     onPress={() => openPage(featuredMovie.metadata.identifier)}
-                    color="secondary"
                     size="lg"
                   >
                     Watch

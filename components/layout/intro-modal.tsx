@@ -56,9 +56,7 @@ export default function IntroModal() {
               </p>
             </ModalBody>
             <ModalFooter>
-              <Button color="primary" onPress={onClose}>
-                Continue
-              </Button>
+              <Button onPress={onClose}>Continue</Button>
             </ModalFooter>
           </>
         )}

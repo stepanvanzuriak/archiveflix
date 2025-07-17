@@ -33,7 +33,7 @@ export default function Reviews({ reviews }: { reviews: ReviewType[] }) {
           isCompact
           showControls
           showShadow
-          color="secondary"
+          color="default"
           page={page}
           total={pages}
           onChange={(page) => setPage(page)}

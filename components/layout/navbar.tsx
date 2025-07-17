@@ -72,11 +72,9 @@ export default function Navbar() {
               <Link
                 className="w-full"
                 color={
-                  index === 2
-                    ? "primary"
-                    : index === siteConfig.navMenuItems.length - 1
-                      ? "danger"
-                      : "foreground"
+                  index === siteConfig.navMenuItems.length - 1
+                    ? "danger"
+                    : "foreground"
                 }
                 href={href}
               >

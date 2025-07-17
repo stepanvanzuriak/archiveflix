@@ -141,7 +141,7 @@ const FilesList = ({
             isCompact
             showControls
             showShadow
-            color="secondary"
+            color="default"
             page={page}
             total={pages}
             onChange={(page) => setPage(page)}
