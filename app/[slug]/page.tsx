@@ -31,7 +31,7 @@ export default async function MoviePage({
     <div>
       <Player slug={slug} />
       <div className="flex items-center mb-4 gap-4 sm:justify-between">
-        <h1 className="text-2xl text-primary">{title as string}</h1>
+        <h1 className="text-2xl">{title as string}</h1>
         <VideoActions
           withExpandedVersion
           identifier={identifier}

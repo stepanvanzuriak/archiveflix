@@ -20,9 +20,7 @@ export default function CollectionView({
 
   return (
     <>
-      {collection && (
-        <h2 className="text-3xl text-primary">{topicParser(collection)}</h2>
-      )}
+      {collection && <h2 className="text-3xl">{topicParser(collection)}</h2>}
       <ListControls />
 
       <Suspense fallback={<Loading className="flex-grow" />}>

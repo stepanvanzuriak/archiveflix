@@ -34,7 +34,7 @@ export default function Review({ review }: { review: ReviewType }) {
 
   return (
     <>
-      <h3 className="text-primary text-large">{review.reviewtitle}</h3>
+      <h3 className="text-large">{review.reviewtitle}</h3>
       <h6 className="text-small mb-2">by {review.reviewer}</h6>
 
       <div className="flex mb-4">
@@ -52,7 +52,7 @@ export default function Review({ review }: { review: ReviewType }) {
         {reviewBody}{" "}
         {shouldBeCliped && (
           <div
-            className="text-primary inline cursor-pointer"
+            className="inline cursor-pointer"
             onClick={() => setIsFull((prev) => !prev)}
             onKeyPress={() => setIsFull((prev) => !prev)}
             role="button"

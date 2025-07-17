@@ -28,7 +28,7 @@ const VideoCard = ({
   onNotInterested: (id: string) => void;
 }) => {
   const [thumbnail] = movie.files.filter(
-    ({ name }) => name === "__ia_thumb.jpg"
+    ({ name }) => name === "__ia_thumb.jpg",
   );
 
   const description = movie.metadata.description;
@@ -45,7 +45,7 @@ const VideoCard = ({
       onClick={() => {
         openPage(identifier);
       }}
-      className="text-primary border-secondary border-2"
+      className="border-white border-2"
       isPressable
       shadow="none"
     >

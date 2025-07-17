@@ -21,11 +21,11 @@ export default function NextPage() {
     <div className="flex gap-5">
       {currentPage - 1 > 0 && (
         <Link href={createPageURL(currentPage - 1)}>
-          <Button color="primary">Previous</Button>
+          <Button>Previous</Button>
         </Link>
       )}
       <Link href={createPageURL(currentPage + 1)}>
-        <Button color="primary">Next</Button>
+        <Button>Next</Button>
       </Link>
     </div>
   );

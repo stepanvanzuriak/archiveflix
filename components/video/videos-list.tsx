@@ -12,7 +12,7 @@ import VideoCard from "./video-card";
 import { useUserStore } from "@/stores/user-store-provider";
 import { fetcher, getItem, getItems } from "@/service/api";
 
-const DESIRED_MOVIES_COUNT = 12; // Target number of movies to display
+const DESIRED_MOVIES_COUNT = 12;
 
 const VideosList = ({
   currentPage,
@@ -33,7 +33,6 @@ const VideosList = ({
   const likes = useUserStore((store) => store.likes);
   const watched = useUserStore((store) => store.watched);
 
-  // Calculate how many extra rows we might need based on filter list size
   const estimatedExtraRows = notInterestedList.length;
   const adjustedRows = DESIRED_MOVIES_COUNT + estimatedExtraRows;
 
@@ -185,7 +184,7 @@ const VideosList = ({
     isLoading ||
     moviesLoading ||
     data?.response.afterRevalidation ||
-    filteredMovies[0].metadata.afterRevalidation
+    filteredMovies[0]?.metadata?.afterRevalidation
   ) {
     return <Loading className="h-full" />;
   }

@@ -391,7 +391,7 @@ const CategoryRow: React.FC<{
   if (isLoading) {
     return (
       <div className="mb-8">
-        <h2 className="text-primary text-xl font-bold mb-4">{title}</h2>
+        <h2 className="text-xl font-bold mb-4">{title}</h2>
         <div className="flex space-x-4 overflow-x-hidden">
           {[...Array(4)].map((_, i) => (
             <div
@@ -408,7 +408,7 @@ const CategoryRow: React.FC<{
 
   return (
     <div className="mb-8">
-      <h2 className="text-primary text-xl font-bold mb-4">{title}</h2>
+      <h2 className="text-xl font-bold mb-4">{title}</h2>
       <div className="relative">
         <div className="overflow-x-auto scrollbar-hide">
           <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">

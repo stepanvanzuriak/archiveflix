@@ -50,7 +50,7 @@ const TopControls = ({
   return (
     <div className="flex flex-col gap-4">
       <button>
-        <h1 className="text-lg text-primary flex items-center">Files</h1>
+        <h1 className="text-lg flex items-center">Files</h1>
       </button>
       <div className="flex justify-between gap-3 items-end">
         <Input

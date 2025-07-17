@@ -59,10 +59,24 @@ function FilterSelect({ onChange }: { onChange: (items: string[]) => void }) {
       <DropdownTrigger>
         <Button
           className={clsx("capitalize w-40", {
-            "border-primary text-primary": Boolean(selectedValue),
+            "border-white": Boolean(selectedValue),
           })}
           variant="bordered"
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="size-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
+            />
+          </svg>
           Change filters
         </Button>
       </DropdownTrigger>
@@ -135,13 +149,12 @@ export default function ListControls() {
   );
 
   return (
-    <div className="flex sm:flex-row flex-col justify-between sm:gap-2 gap-4 text-primary">
+    <div className="flex sm:flex-row flex-col justify-between sm:gap-2 gap-4">
       <Input
         classNames={{
           base: "max-w-full sm:max-w-[14rem] h-10",
           mainWrapper: "h-full",
-          input:
-            "text-small text-primary group-data-[has-value=true]:text-primary",
+          input: "text-small",
           inputWrapper:
             "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
         }}
@@ -160,7 +173,6 @@ export default function ListControls() {
           <ButtonGroup variant="flat">
             <Button
               isIconOnly
-              className="text-primary"
               variant="ghost"
               onPress={() =>
                 router.push(

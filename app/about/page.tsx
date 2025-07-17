@@ -5,6 +5,17 @@ export default function About() {
     <div className="max-w-4xl mx-auto px-4 py-8 text-pretty">
       <h1 className="text-3xl font-bold mb-4">About</h1>
 
+      <p className="mb-8 mt-8 font-bold text-lg">
+        ArchiveFlix is an open-source project, and contributions are welcome!{" "}
+        <Link
+          href="https://github.com/stepanvanzuriak/archiveflix"
+          isExternal
+          showAnchorIcon
+        >
+          github.com/stepanvanzuriak/archiveflix
+        </Link>
+      </p>
+
       <p className="mb-4">
         <strong>ArchiveFlix</strong> is a platform that brings together films,
         series, documentaries, and more — all sourced directly from{" "}

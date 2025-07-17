@@ -45,8 +45,7 @@ export default function HomeSearch() {
         classNames={{
           base: "h-12",
           mainWrapper: "h-full",
-          input:
-            "text-small text-primary group-data-[has-value=true]:text-primary",
+          input: "text-small",
           inputWrapper:
             "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
         }}

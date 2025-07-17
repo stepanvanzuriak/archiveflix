@@ -33,7 +33,7 @@ export default function Navbar() {
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink href="/">
-            <Button variant="bordered" color="primary">
+            <Button variant="bordered" className="border-2 border-white">
               ArchiveFlix
             </Button>
           </NextLink>
@@ -43,7 +43,7 @@ export default function Navbar() {
             <NavbarItem
               key={item.label}
               isActive={pathname === item.href}
-              className="text-primary data-[active=true]:font-bold"
+              className="data-[active=true]:font-bold"
             >
               <NextLink href={item.href}>{item.label}</NextLink>
             </NavbarItem>

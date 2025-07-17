@@ -16,6 +16,10 @@ export const siteConfig = {
       label: "Arts & Music",
       href: "/collection/artsandmusicvideos",
     },
+    {
+      label: "About",
+      href: "/about",
+    },
   ],
   navMenuItems: [
     {
@@ -33,6 +37,10 @@ export const siteConfig = {
     {
       label: "Arts & Music",
       href: "/collection/artsandmusicvideos",
+    },
+    {
+      label: "About",
+      href: "/about",
     },
   ],
   links: {

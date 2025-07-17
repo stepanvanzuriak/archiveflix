@@ -78,7 +78,7 @@ export default function VideoActions({
   return (
     <>
       <Dropdown>
-        <DropdownTrigger className="text-primary min-w-[24px]">
+        <DropdownTrigger className="min-w-[24px]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
