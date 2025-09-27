@@ -10,6 +10,7 @@ export const getItems = (
     subject?: string;
     creator?: string;
     title?: string;
+    excludeIds?: string[];
   },
   page: number = 1,
   opts: { sort?: string; rows?: string } = {},
@@ -26,6 +27,9 @@ export const getItems = (
     ...(filters.subject && { subject: filters.subject }),
     ...(filters.creator && { creator: filters.creator }),
     ...(filters.title && { title: filters.title }),
+    ...(filters.excludeIds && filters.excludeIds.length > 0 && {
+      excludeIds: filters.excludeIds.join(',')
+    }),
     page: options.page.toString(),
     rows: options.rows,
     sort: options.sort,

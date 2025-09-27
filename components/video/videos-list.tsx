@@ -33,8 +33,23 @@ const VideosList = ({
   const likes = useUserStore((store) => store.likes);
   const watched = useUserStore((store) => store.watched);
 
-  const estimatedExtraRows = notInterestedList.length;
-  const adjustedRows = DESIRED_MOVIES_COUNT + estimatedExtraRows;
+  // Build exclude list based on current filters
+  const excludeIds = useMemo(() => {
+    const filters = filter.split(",");
+    const toExclude: string[] = [];
+
+    if (filters.includes("watched")) {
+      toExclude.push(...watched);
+    }
+    if (filters.includes("liked")) {
+      toExclude.push(...likes);
+    }
+    if (filters.includes("not_interested")) {
+      toExclude.push(...notInterestedList);
+    }
+
+    return toExclude;
+  }, [filter, watched, likes, notInterestedList]);
 
   const { data, mutate, isLoading } = useSWR<{
     response: {
@@ -47,79 +62,22 @@ const VideosList = ({
       {
         collection,
         title: currentSearch,
+        excludeIds,
       },
       Number(currentPage),
       {
         sort: currentSort,
-        rows: adjustedRows.toString(),
+        rows: DESIRED_MOVIES_COUNT.toString(),
       },
     ),
     fetcher,
   );
 
-  const filterMovies = useCallback(
-    ({ identifier }: { identifier: string }) => {
-      const filters = filter.split(",");
-
-      if (filters.includes("watched") && watched.includes(identifier)) {
-        return false;
-      }
-
-      if (filters.includes("liked") && likes.includes(identifier)) {
-        return false;
-      }
-
-      if (
-        filters.includes("not_interested") &&
-        notInterestedList.includes(identifier)
-      ) {
-        return false;
-      }
-
-      return true;
-    },
-    [filter, likes, notInterestedList, watched],
-  );
-
   const moviesIds = useMemo(() => {
     if (!data?.response.docs) return [];
 
-    const movies = data.response.docs
-      .filter(filterMovies)
-      .map(({ identifier }) => identifier);
-
-    return movies.slice(0, DESIRED_MOVIES_COUNT);
-  }, [data?.response.docs, filterMovies]);
-
-  // Refetch with more rows if needed
-  useEffect(() => {
-    const shouldFetchMore =
-      moviesIds.length < DESIRED_MOVIES_COUNT && data && !currentSearch;
-
-    if (shouldFetchMore) {
-      const newRowCount = Math.min(
-        adjustedRows + DESIRED_MOVIES_COUNT,
-        100, // Cap to prevent too large requests
-      );
-
-      // Trigger a new fetch with more rows
-      const newUrl = getItems({ collection }, Number(currentPage), {
-        sort: currentSort,
-        rows: newRowCount.toString(),
-      });
-
-      mutate(fetcher(newUrl), { revalidate: false });
-    }
-  }, [
-    moviesIds,
-    data,
-    adjustedRows,
-    collection,
-    currentPage,
-    currentSort,
-    currentSearch,
-    mutate,
-  ]);
+    return data.response.docs.map(({ identifier }) => identifier);
+  }, [data?.response.docs]);
 
   const openPage = (name: string) => {
     router.push(`/${name}`);

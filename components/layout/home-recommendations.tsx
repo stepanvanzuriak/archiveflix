@@ -255,12 +255,9 @@ const findFeaturedMovie = (
 const useCategoryData = (
   category: RecommendationCategory,
   isActive: boolean,
-  filter: string[],
+  excludeIds: string[],
 ): CategoryData => {
-  const estimatedExtraRows = Math.ceil(filter.length / CATEGORIES.length);
-  const initialRows = MOVIES_PER_CATEGORY + estimatedExtraRows;
-
-  const { data, mutate, isLoading } = useSWR<{
+  const { data, isLoading } = useSWR<{
     response: {
       docs: { identifier: string }[];
       numFound: number;
@@ -271,11 +268,12 @@ const useCategoryData = (
           {
             collection: category.collection,
             title: category.title,
+            excludeIds,
           },
           1, // Always fetch first page for recommendations
           {
             sort: category.sort || "downloads desc",
-            rows: initialRows.toString(),
+            rows: MOVIES_PER_CATEGORY.toString(),
           },
         )
       : null,
@@ -285,58 +283,8 @@ const useCategoryData = (
   const movieIds = useMemo(() => {
     if (!data?.response?.docs) return [];
 
-    const filtered = data.response.docs
-      .filter(({ identifier }) => !filter.includes(identifier))
-      .map(({ identifier }) => identifier);
-
-    return filtered.slice(0, MOVIES_PER_CATEGORY);
-  }, [data, filter]);
-
-  const needsMoreData = useMemo(() => {
-    if (!data?.response?.docs || !isActive) return false;
-
-    const filteredCount = data.response.docs.filter(
-      ({ identifier }) => !filter.includes(identifier),
-    ).length;
-
-    // We need more data if we have fewer filtered results than desired
-    // AND there are more items available in the collection
-    return (
-      filteredCount < MOVIES_PER_CATEGORY &&
-      data.response.docs.length < data.response.numFound
-    );
-  }, [data, filter, isActive]);
-
-  useEffect(() => {
-    const shouldFetchMore = needsMoreData && data && isActive;
-
-    if (shouldFetchMore) {
-      const newRowCount = Math.min(initialRows + MOVIES_PER_CATEGORY, 50);
-
-      const newUrl = getItems(
-        {
-          collection: category.collection,
-          title: category.title,
-        },
-        1,
-        {
-          sort: category.sort || "downloads desc",
-          rows: newRowCount.toString(),
-        },
-      );
-
-      mutate(fetcher(newUrl), { revalidate: false });
-    }
-  }, [
-    needsMoreData,
-    data,
-    initialRows,
-    category.collection,
-    category.title,
-    category.sort,
-    isActive,
-    mutate,
-  ]);
+    return data.response.docs.map(({ identifier }) => identifier);
+  }, [data]);
 
   const {
     data: movies = [],
@@ -458,22 +406,24 @@ const HomeRecommendations: React.FC = () => {
     return extractUserPreferences(likedMovies);
   }, [likedMovies]);
 
-  const filteredItems = Array.from(new Set([...filter, ...likes, ...watched]));
+  const excludeIds = useMemo(() => {
+    return Array.from(new Set([...filter, ...likes, ...watched]));
+  }, [filter, likes, watched]);
 
   const popularData = useCategoryData(
     CATEGORIES[0],
     activeCategories.includes("Popular Classic Films"),
-    filteredItems,
+    excludeIds,
   );
   const educationData = useCategoryData(
     CATEGORIES[1],
     activeCategories.includes("Educational Content"),
-    filteredItems,
+    excludeIds,
   );
   const animationData = useCategoryData(
     CATEGORIES[2],
     activeCategories.includes("Animation Collection"),
-    filteredItems,
+    excludeIds,
   );
 
   const categoryData = useMemo(

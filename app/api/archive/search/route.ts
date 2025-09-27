@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
   const sort = req.nextUrl.searchParams.get("sort");
   const rows = req.nextUrl.searchParams.get("rows");
   const title = req.nextUrl.searchParams.get("title");
+  const excludeIds = req.nextUrl.searchParams.get("excludeIds");
 
   const queryParts = [
     collection ? `collection:(${collection})` : "",
@@ -16,8 +17,16 @@ export async function GET(req: NextRequest) {
     title ? `title:(${title})` : "",
   ].filter(Boolean);
 
-  // Add the filter to exclude collections
-  queryParts.push("NOT mediatype:collection");
+  // Add the filter to include only videos/movies
+  queryParts.push("mediatype:movies");
+
+  // Exclude specific IDs if provided
+  if (excludeIds) {
+    const idsArray = excludeIds.split(",");
+    idsArray.forEach((id) => {
+      queryParts.push(`NOT identifier:(${id})`);
+    });
+  }
 
   const q = queryParts.join(" AND ");
 

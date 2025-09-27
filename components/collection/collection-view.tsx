@@ -1,11 +1,8 @@
 import { Suspense } from "react";
-
+import { topicParser } from "@/utils";
 import Loading from "../layout/loading";
 import Videos from "../video/videos-list";
-
 import ListControls from "./list-controls";
-
-import { topicParser } from "@/utils";
 
 export default function CollectionView({
   collection,
