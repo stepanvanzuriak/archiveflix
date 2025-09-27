@@ -11,6 +11,7 @@ import {
 import { Button } from "@heroui/button";
 
 import { useUserStore } from "@/stores/user-store-provider";
+import Link from "next/link";
 
 export default function UserProfile() {
   const filter = useUserStore((store) => store.filter);
@@ -32,7 +33,11 @@ export default function UserProfile() {
           <TableBody>
             {likes.map((id) => (
               <TableRow key={id}>
-                <TableCell>{id}</TableCell>
+                <TableCell>
+                  <Link className="cursor-pointer underline" href={`/${id}`}>
+                    {id}
+                  </Link>
+                </TableCell>
                 <TableCell>
                   <Button onPress={() => removeLike(id)}>Remove</Button>
                 </TableCell>
@@ -50,7 +55,11 @@ export default function UserProfile() {
           <TableBody>
             {watched.map((id) => (
               <TableRow key={id}>
-                <TableCell>{id}</TableCell>
+                <TableCell>
+                  <Link className="cursor-pointer underline" href={`/${id}`}>
+                    {id}
+                  </Link>
+                </TableCell>
                 <TableCell>
                   <Button onPress={() => removeWatched(id)}>Remove</Button>
                 </TableCell>
@@ -70,7 +79,11 @@ export default function UserProfile() {
           <TableBody>
             {filter.map((id) => (
               <TableRow key={id}>
-                <TableCell>{id}</TableCell>
+                <TableCell>
+                  <Link className="cursor-pointer underline" href={`/${id}`}>
+                    {id}
+                  </Link>
+                </TableCell>
                 <TableCell>
                   <Button onPress={() => removeFilter(id)}>Remove</Button>
                 </TableCell>

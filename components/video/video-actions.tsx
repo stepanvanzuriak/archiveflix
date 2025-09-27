@@ -149,9 +149,9 @@ export default function VideoActions({
             radius="md"
             isIconOnly
             className={clsx({
-              "border-blue-400": isLiked,
+              "border-blue-400": isWatched,
             })}
-            onPress={() => handleDropDown("like", identifier)}
+            onPress={() => handleDropDown("watched", identifier)}
           >
             <Watched />
           </Button>
