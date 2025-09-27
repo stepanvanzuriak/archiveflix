@@ -59,7 +59,8 @@ function FilterSelect({ onChange }: { onChange: (items: string[]) => void }) {
       <DropdownTrigger>
         <Button
           className={clsx("capitalize w-40", {
-            "border-white": Boolean(selectedValue),
+            "dark:border-white": Boolean(selectedValue),
+            "border-black": Boolean(selectedValue),
           })}
           variant="bordered"
         >

@@ -33,7 +33,10 @@ export default function Navbar() {
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink href="/">
-            <Button variant="bordered" className="border-2 border-white">
+            <Button
+              variant="bordered"
+              className="border-2 border-black dark:border-white"
+            >
               ArchiveFlix
             </Button>
           </NextLink>

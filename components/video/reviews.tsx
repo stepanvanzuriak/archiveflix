@@ -22,7 +22,7 @@ export default function Reviews({ reviews }: { reviews: ReviewType[] }) {
     <ul>
       {items.map((review) => (
         <li
-          className="mb-4 bg-content1 p-4 rounded-large"
+          className="mb-4 bg-default-100 p-4 rounded-large"
           key={`${review.reviewtitle}`}
         >
           <Review review={review} />

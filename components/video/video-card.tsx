@@ -45,7 +45,7 @@ const VideoCard = ({
       onClick={() => {
         openPage(identifier);
       }}
-      className="border-white border-2"
+      className="border-dark dark:border-white border-2"
       isPressable
       shadow="none"
     >
