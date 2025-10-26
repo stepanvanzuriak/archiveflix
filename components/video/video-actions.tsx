@@ -10,10 +10,9 @@ import {
   DropdownTrigger,
 } from "@heroui/dropdown";
 import { Button } from "@heroui/button";
+import { useUserStore } from "@/stores/user-store-provider";
 
 import { HeartIcon, HideIcon, Watched } from "../layout/icons";
-
-import { useUserStore } from "@/stores/user-store-provider";
 
 export default function VideoActions({
   identifier,

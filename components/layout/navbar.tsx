@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
@@ -10,14 +11,12 @@ import {
   NavbarMenuItem,
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
-import Link from "next/link";
-import { useState } from "react";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 
-import ThemeSwitch from "./theme-switch";
-
 import { siteConfig } from "@/config/site";
+
+import ThemeSwitch from "./theme-switch";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -58,9 +57,9 @@ export default function Navbar() {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-        <Link href="/profile">
+        <NextLink href="/profile">
           <Button>Profile</Button>
-        </Link>
+        </NextLink>
         <NavbarItem className="hidden sm:flex gap-2">
           <ThemeSwitch />
         </NavbarItem>
@@ -72,7 +71,7 @@ export default function Navbar() {
         <NavbarMenu>
           {siteConfig.navMenuItems.map(({ label, href }, index) => (
             <NavbarMenuItem key={label} onClick={() => setIsMenuOpen(false)}>
-              <Link
+              <NextLink
                 className="w-full"
                 color={
                   index === siteConfig.navMenuItems.length - 1
@@ -82,7 +81,7 @@ export default function Navbar() {
                 href={href}
               >
                 {label}
-              </Link>
+              </NextLink>
             </NavbarMenuItem>
           ))}
         </NavbarMenu>

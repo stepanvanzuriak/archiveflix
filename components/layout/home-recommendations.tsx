@@ -1,19 +1,19 @@
 "use client";
-import Image from "next/image";
-import { Button } from "@heroui/button";
+import { useMemo, useCallback } from "react";
 import { sampleSize } from "lodash";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
-
-import Loading from "../layout/loading";
-import VideoCard from "../video/video-card";
+import { Button } from "@heroui/button";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { useUserStore } from "@/stores/user-store-provider";
 import { COMMON_WORDS } from "@/constants";
 import { fetcher, getItem, getItems } from "@/service/api";
 import { cleanHTML, processArrayOrString } from "@/utils";
+
+import Loading from "../layout/loading";
+import VideoCard from "../video/video-card";
 
 interface MovieData {
   files: { name: string }[];
@@ -52,7 +52,6 @@ interface UserPreferences {
   keywords: Set<string>;
 }
 
-// Constants
 const MOVIES_PER_CATEGORY = 4;
 
 const CATEGORIES: RecommendationCategory[] = [
@@ -270,7 +269,7 @@ const useCategoryData = (
             title: category.title,
             excludeIds,
           },
-          1, // Always fetch first page for recommendations
+          1,
           {
             sort: category.sort || "downloads desc",
             rows: MOVIES_PER_CATEGORY.toString(),
@@ -315,7 +314,6 @@ const useCategoryData = (
   };
 };
 
-// Category Row Component
 const CategoryRow: React.FC<{
   title: string;
   categoryData: CategoryData;
@@ -378,11 +376,9 @@ const CategoryRow: React.FC<{
   );
 };
 
-// Main Component
 const HomeRecommendations: React.FC = () => {
   const router = useRouter();
-  const [featuredMovie, setFeaturedMovie] = useState<MovieData | null>(null);
-  const [activeCategories, setActiveCategories] = useState<string[]>([]);
+  const activeCategories = CATEGORIES.map((cat) => cat.name);
 
   const likes = useUserStore((store) => store.likes);
   const filter = useUserStore((store) => store.filter);
@@ -442,7 +438,6 @@ const HomeRecommendations: React.FC = () => {
     [router],
   );
 
-  // Check if any category is still loading
   const isAnyLoading = useMemo(
     () =>
       Object.values(categoryData).some((data) => data.isLoading) ||
@@ -450,19 +445,7 @@ const HomeRecommendations: React.FC = () => {
     [categoryData, likesLoading],
   );
 
-  useEffect(() => {
-    setActiveCategories(CATEGORIES.map((cat) => cat.name));
-  }, []);
-
-  useEffect(() => {
-    if (!featuredMovie && !likesLoading) {
-      const featured = findFeaturedMovie(categoryData, userPreferences, likes);
-
-      if (featured) {
-        setFeaturedMovie(featured);
-      }
-    }
-  }, [categoryData, featuredMovie, userPreferences, likes, likesLoading]);
+  const featuredMovie = findFeaturedMovie(categoryData, userPreferences, likes);
 
   const [thumbnail] = featuredMovie
     ? featuredMovie.files.filter(({ name }) => name === "__ia_thumb.jpg")

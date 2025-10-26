@@ -2,7 +2,6 @@ import Image from "next/image";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 
 import { HeartIcon, HideIcon, Watched } from "../layout/icons";
-
 import VideoActions from "./video-actions";
 
 const VideoCard = ({

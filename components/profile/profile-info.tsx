@@ -9,9 +9,9 @@ import {
   TableRow,
 } from "@heroui/table";
 import { Button } from "@heroui/button";
+import Link from "next/link";
 
 import { useUserStore } from "@/stores/user-store-provider";
-import Link from "next/link";
 
 export default function UserProfile() {
   const filter = useUserStore((store) => store.filter);
