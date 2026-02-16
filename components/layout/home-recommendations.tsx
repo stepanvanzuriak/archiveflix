@@ -10,13 +10,13 @@ import Image from "next/image";
 import { useUserStore } from "@/stores/user-store-provider";
 import { COMMON_WORDS } from "@/constants";
 import { fetcher, getItem, getItems } from "@/service/api";
-import { cleanHTML, processArrayOrString } from "@/utils";
+import { cleanHTML, processArrayOrString, pickBestThumbnail, ArchiveFile } from "@/utils";
 
 import Loading from "../layout/loading";
 import VideoCard from "../video/video-card";
 
 interface MovieData {
-  files: { name: string }[];
+  files: ArchiveFile[];
   metadata: {
     description: string;
     title: string;
@@ -288,7 +288,7 @@ const useCategoryData = (
   const {
     data: movies = [],
     isLoading: moviesLoading,
-    mutate: mutatItems,
+    mutate: mutateItems,
   } = useSWRInfinite<MovieData>(
     (index) => (movieIds[index] && isActive ? getItem(movieIds[index]) : null),
     fetcher,
@@ -307,7 +307,10 @@ const useCategoryData = (
     movies: filteredMovies,
     isLoading: isLoading || moviesLoading,
     mutateItems: async (id: string) => {
-      mutatItems(movies.filter((item) => item.metadata.identifier !== id));
+      mutateItems(
+        movies.filter((item) => item.metadata.identifier !== id),
+        { revalidate: false },
+      );
     },
     hasMore:
       (data?.response?.numFound || 0) > (data?.response?.docs?.length || 0),
@@ -447,9 +450,9 @@ const HomeRecommendations: React.FC = () => {
 
   const featuredMovie = findFeaturedMovie(categoryData, userPreferences, likes);
 
-  const [thumbnail] = featuredMovie
-    ? featuredMovie.files.filter(({ name }) => name === "__ia_thumb.jpg")
-    : [];
+  const thumbnailName = featuredMovie
+    ? pickBestThumbnail(featuredMovie.files)
+    : null;
 
   if (isAnyLoading && !featuredMovie) {
     return <Loading className="h-full" />;
@@ -459,7 +462,7 @@ const HomeRecommendations: React.FC = () => {
     <div className="flex-grow w-full">
       {featuredMovie && (
         <div className="relative h-96 mb-8 overflow-hidden rounded-md">
-          {thumbnail && (
+          {thumbnailName && (
             <div className="absolute inset-0">
               <Image
                 fill
@@ -467,7 +470,7 @@ const HomeRecommendations: React.FC = () => {
                 alt={featuredMovie.metadata.title}
                 className="object-cover object-center grayscale blur-sm"
                 sizes="100vw"
-                src={`https://archive.org/download/${featuredMovie.metadata.identifier}/${thumbnail.name}`}
+                src={`https://archive.org/download/${featuredMovie.metadata.identifier}/${thumbnailName}`}
               />
             </div>
           )}
@@ -476,7 +479,7 @@ const HomeRecommendations: React.FC = () => {
 
           <div className="relative z-20 h-full flex items-center">
             <div className="flex items-center gap-8 px-12 w-full">
-              {thumbnail && (
+              {thumbnailName && (
                 <div className="flex-shrink-0 hidden sm:block">
                   <div className="relative w-48 h-72 rounded-lg overflow-hidden shadow-2xl">
                     <Image
@@ -485,7 +488,7 @@ const HomeRecommendations: React.FC = () => {
                       alt={featuredMovie.metadata.title}
                       className="object-cover rounded-md"
                       sizes="192px"
-                      src={`https://archive.org/download/${featuredMovie.metadata.identifier}/${thumbnail.name}`}
+                      src={`https://archive.org/download/${featuredMovie.metadata.identifier}/${thumbnailName}`}
                     />
                   </div>
                 </div>

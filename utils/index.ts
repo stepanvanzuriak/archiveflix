@@ -52,3 +52,49 @@ export const processArrayOrString = <T>(
 
 export const cleanHTML = (html: string) =>
   html.replace(/style="[^"]*"/g, "").replace(/color="[^"]*"/g, "");
+
+export interface ArchiveFile {
+  name: string;
+  format?: string;
+  source?: string;
+  size?: string;
+}
+
+export const pickBestThumbnail = (files: ArchiveFile[]): string | null => {
+  // 1. _itemimage.jpg — high-res item image
+  const itemImage = files.find(({ name }) => name === "_itemimage.jpg");
+  if (itemImage) return itemImage.name;
+
+  // 2. Original JPEGs — largest by size
+  const originalJpegs = files.filter(
+    ({ format, source, name }) =>
+      format === "JPEG" &&
+      source === "original" &&
+      name !== "__ia_thumb.jpg" &&
+      !name.includes("/"),
+  );
+  if (originalJpegs.length > 0) {
+    originalJpegs.sort(
+      (a, b) => Number(b.size || 0) - Number(a.size || 0),
+    );
+    return originalJpegs[0].name;
+  }
+
+  // 3. Any JPEG derivative — largest by size, excluding thumb
+  const anyJpegs = files.filter(
+    ({ format, name }) =>
+      format === "JPEG" &&
+      name !== "__ia_thumb.jpg" &&
+      !name.includes("/"),
+  );
+  if (anyJpegs.length > 0) {
+    anyJpegs.sort(
+      (a, b) => Number(b.size || 0) - Number(a.size || 0),
+    );
+    return anyJpegs[0].name;
+  }
+
+  // 4. Fallback to __ia_thumb.jpg
+  const thumb = files.find(({ name }) => name === "__ia_thumb.jpg");
+  return thumb ? thumb.name : null;
+};

@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Button, ButtonGroup } from "@heroui/button";
 import { Input } from "@heroui/input";
 import {
@@ -50,9 +50,13 @@ function FilterSelect({ onChange }: { onChange: (items: string[]) => void }) {
     [selectedKeys],
   );
 
-  useEffect(() => {
-    onChange(Array.from(selectedKeys));
-  }, [selectedKeys, onChange]);
+  const handleSelectionChange = useCallback(
+    (keys: Set<string>) => {
+      setSelectedKeys(keys);
+      onChange(Array.from(keys));
+    },
+    [onChange],
+  );
 
   return (
     <Dropdown>
@@ -88,7 +92,7 @@ function FilterSelect({ onChange }: { onChange: (items: string[]) => void }) {
         selectionMode="multiple"
         variant="flat"
         // @ts-expect-error Complex type
-        onSelectionChange={setSelectedKeys}
+        onSelectionChange={handleSelectionChange}
       >
         {filters.map((item) => (
           <DropdownItem key={item.key}>{item.label}</DropdownItem>
@@ -138,15 +142,18 @@ export default function ListControls() {
     [],
   );
 
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
+
   const onChangeFilter = useCallback(
     (filters: string[]) => {
-      const params = new URLSearchParams(searchParams);
+      const params = new URLSearchParams(searchParamsRef.current);
 
       params.set("filter", filters.join(","));
 
       router.push(`${pathname}?${params.toString()}`);
     },
-    [pathname, router, searchParams],
+    [pathname, router],
   );
 
   return (

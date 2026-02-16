@@ -3,6 +3,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 
 import { HeartIcon, HideIcon, Watched } from "../layout/icons";
 import VideoActions from "./video-actions";
+import { pickBestThumbnail, ArchiveFile } from "@/utils";
 
 const VideoCard = ({
   movie,
@@ -13,7 +14,7 @@ const VideoCard = ({
   isNotInterested,
 }: {
   movie: {
-    files: { name: string }[];
+    files: ArchiveFile[];
     metadata: {
       description: string;
       title: string;
@@ -26,9 +27,7 @@ const VideoCard = ({
   openPage: (page: string) => void;
   onNotInterested: (id: string) => void;
 }) => {
-  const [thumbnail] = movie.files.filter(
-    ({ name }) => name === "__ia_thumb.jpg",
-  );
+  const thumbnailName = pickBestThumbnail(movie.files);
 
   const description = movie.metadata.description;
   const formatedDescription =
@@ -72,15 +71,15 @@ const VideoCard = ({
           {formatedDescription}
         </small>
       </CardHeader>
-      <CardBody className="overflow-visible h-44">
-        {!!thumbnail && (
+      <CardBody className="overflow-hidden h-44 relative">
+        {!!thumbnailName && (
           <Image
             fill
             priority
-            alt={thumbnail.name as string}
-            className="max-w-[220px] max-h-40 m-auto grayscale-50 rounded-large"
-            sizes="(max-width: 220px) (max-height: 160px)"
-            src={`https://archive.org/download/${movie.metadata.identifier as string}/${thumbnail.name as string}`}
+            alt={thumbnailName}
+            className="object-cover grayscale-50 rounded-large !inset-2 !w-[calc(100%-1rem)] !h-[calc(100%-1rem)]"
+            sizes="(max-width: 768px) 100vw, 256px"
+            src={`https://archive.org/download/${movie.metadata.identifier}/${thumbnailName}`}
           />
         )}
       </CardBody>

@@ -11,6 +11,7 @@ import VideoCard from "./video-card";
 
 import { useUserStore } from "@/stores/user-store-provider";
 import { fetcher, getItem, getItems } from "@/service/api";
+import { ArchiveFile } from "@/utils";
 
 const DESIRED_MOVIES_COUNT = 12;
 
@@ -26,7 +27,7 @@ const VideosList = ({
   currentSearch: string;
 }) => {
   const searchParams = useSearchParams();
-  const filter = (searchParams.get("filter") as string) || "";
+  const filter = (searchParams.get("filter") as string) || "not_interested";
   const router = useRouter();
 
   const notInterestedList = useUserStore((store) => store.filter);
@@ -88,7 +89,7 @@ const VideosList = ({
     isLoading: moviesLoading,
     mutate: mutateItems,
   } = useSWRInfinite<{
-    files: { name: string }[];
+    files: ArchiveFile[];
     metadata: {
       description: string;
       title: string;
@@ -101,7 +102,10 @@ const VideosList = ({
 
   const onNotInterested = useCallback(
     (id: string) => {
-      mutateItems(movies.filter((item) => item.metadata.identifier !== id));
+      mutateItems(
+        movies.filter((item) => item.metadata.identifier !== id),
+        { revalidate: false },
+      );
     },
     [mutateItems, movies],
   );
