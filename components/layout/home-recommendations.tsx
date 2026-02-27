@@ -116,8 +116,8 @@ const extractUserPreferences = (likedMovies: MovieData[]): UserPreferences => {
       preferences.subjects.add(subject.toLowerCase());
     });
 
-    if (metadata.genre) {
-      metadata.genre?.forEach((genre) =>
+    if (metadata.genre && Array.isArray(metadata.genre)) {
+      metadata.genre.forEach((genre) =>
         preferences.genres.add(genre.toLowerCase()),
       );
     }
@@ -174,8 +174,8 @@ const calculateMovieScore = (
     }
   });
 
-  if (metadata.genre) {
-    metadata.genre?.forEach((genre) => {
+  if (metadata.genre && Array.isArray(metadata.genre)) {
+    metadata.genre.forEach((genre) => {
       if (userPreferences.genres.has(genre.toLowerCase())) {
         score += 50;
       }
