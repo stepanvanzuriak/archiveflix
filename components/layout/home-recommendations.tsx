@@ -471,6 +471,7 @@ const HomeRecommendations: React.FC = () => {
                 className="object-cover object-center grayscale blur-sm"
                 sizes="100vw"
                 src={`https://archive.org/download/${featuredMovie.metadata.identifier}/${thumbnailName}`}
+                unoptimized
               />
             </div>
           )}
@@ -489,6 +490,7 @@ const HomeRecommendations: React.FC = () => {
                       className="object-cover rounded-md"
                       sizes="192px"
                       src={`https://archive.org/download/${featuredMovie.metadata.identifier}/${thumbnailName}`}
+                      unoptimized
                     />
                   </div>
                 </div>

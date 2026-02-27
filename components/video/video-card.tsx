@@ -80,6 +80,7 @@ const VideoCard = ({
             className="object-cover grayscale-50 rounded-large !inset-2 !w-[calc(100%-1rem)] !h-[calc(100%-1rem)]"
             sizes="(max-width: 768px) 100vw, 256px"
             src={`https://archive.org/download/${movie.metadata.identifier}/${thumbnailName}`}
+            unoptimized
           />
         )}
       </CardBody>
