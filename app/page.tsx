@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import clsx from "clsx";
 
 import CollectionView from "@/components/collection/collection-view";
 import HomeSearch from "@/components/layout/home-search";
 import HomeRecommendations from "@/components/layout/home-recommendations";
+import Loading from "@/components/layout/loading";
 
 export default async function Home({
   searchParams,
@@ -22,7 +24,9 @@ export default async function Home({
       ) : (
         <>
           <HomeSearch />
-          <HomeRecommendations />
+          <Suspense fallback={<Loading className="h-full" />}>
+            <HomeRecommendations />
+          </Suspense>
         </>
       )}
     </section>

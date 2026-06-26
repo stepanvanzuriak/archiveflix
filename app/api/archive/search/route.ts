@@ -1,49 +1,26 @@
 import { type NextRequest } from "next/server";
 
+import { searchItems } from "@/service/archive";
+
 export async function GET(req: NextRequest) {
-  const collection = req.nextUrl.searchParams.get("collection");
-  const subject = req.nextUrl.searchParams.get("subject");
-  const creator = req.nextUrl.searchParams.get("creator");
-  const page = req.nextUrl.searchParams.get("page");
-  const sort = req.nextUrl.searchParams.get("sort");
-  const rows = req.nextUrl.searchParams.get("rows");
-  const title = req.nextUrl.searchParams.get("title");
-  const excludeIds = req.nextUrl.searchParams.get("excludeIds");
-
-  const queryParts = [
-    collection ? `collection:(${collection})` : "",
-    subject ? `subject:(${subject})` : "",
-    creator ? `creator:(${creator})` : "",
-    title ? `title:(${title})` : "",
-  ].filter(Boolean);
-
-  // Add the filter to include only videos/movies
-  queryParts.push("mediatype:movies");
-
-  // Exclude specific IDs if provided
-  if (excludeIds) {
-    const idsArray = excludeIds.split(",");
-    idsArray.forEach((id) => {
-      queryParts.push(`NOT identifier:(${id})`);
-    });
-  }
-
-  const q = queryParts.join(" AND ");
-
-  const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier&rows=${rows}&page=${page}&output=json&sort[]=${encodeURIComponent(sort as string)}`;
-
-  const access = process.env.S3!;
-  const secret = process.env.S3_SECRET!;
-  const authHeader = `LOW ${access}:${secret}`;
+  const params = req.nextUrl.searchParams;
+  const excludeIds = params.get("excludeIds");
 
   try {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: authHeader,
+    const data = await searchItems(
+      {
+        collection: params.get("collection") || undefined,
+        subject: params.get("subject") || undefined,
+        creator: params.get("creator") || undefined,
+        title: params.get("title") || undefined,
+        excludeIds: excludeIds ? excludeIds.split(",") : undefined,
       },
-      next: { revalidate: 3600 },
-    });
-    const data = await response.json();
+      Number(params.get("page")) || 1,
+      {
+        sort: params.get("sort") || undefined,
+        rows: params.get("rows") || undefined,
+      },
+    );
 
     return Response.json(data);
   } catch {

@@ -4780,7 +4780,6 @@ __metadata:
     prettier: "npm:3.5.3"
     react: "npm:19.2.4"
     react-dom: "npm:19.2.4"
-    swr: "npm:^2.4.0"
     tailwind-variants: "npm:0.3.0"
     tailwindcss: "npm:4.1.11"
     typescript: "npm:5.6.3"
@@ -5316,13 +5315,6 @@ __metadata:
     has-property-descriptors: "npm:^1.0.0"
     object-keys: "npm:^1.1.1"
   checksum: 10c0/88a152319ffe1396ccc6ded510a3896e77efac7a1bfbaa174a7b00414a1747377e0bb525d303794a47cf30e805c2ec84e575758512c6e44a993076d29fd4e6c3
-  languageName: node
-  linkType: hard
-
-"dequal@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "dequal@npm:2.0.3"
-  checksum: 10c0/f98860cdf58b64991ae10205137c0e97d384c3a4edc7f807603887b7c4b850af1224a33d88012009f150861cbee4fa2d322c4cc04b9313bee312e47f6ecaa888
   languageName: node
   linkType: hard
 
@@ -7884,18 +7876,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"swr@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "swr@npm:2.4.0"
-  dependencies:
-    dequal: "npm:^2.0.3"
-    use-sync-external-store: "npm:^1.6.0"
-  peerDependencies:
-    react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/176097e737ac79c94ab9ff73f18f3eed104a07cb32ec2f92f8e6deaa7ce2c8227dda8391eed116a7e29b7c379460ccd2f16605bd64ea538df1c610ba54bc52e7
-  languageName: node
-  linkType: hard
-
 "tailwind-merge@npm:3.4.0":
   version: 3.4.0
   resolution: "tailwind-merge@npm:3.4.0"
@@ -8108,11 +8088,11 @@ __metadata:
 
 "typescript@patch:typescript@npm%3A5.6.3#optional!builtin<compat/typescript>":
   version: 5.6.3
-  resolution: "typescript@patch:typescript@npm%3A5.6.3#optional!builtin<compat/typescript>::version=5.6.3&hash=b45daf"
+  resolution: "typescript@patch:typescript@npm%3A5.6.3#optional!builtin<compat/typescript>::version=5.6.3&hash=8c6c40"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/ac8307bb06bbfd08ae7137da740769b7d8c3ee5943188743bb622c621f8ad61d244767480f90fbd840277fbf152d8932aa20c33f867dea1bb5e79b187ca1a92f
+  checksum: 10c0/7c9d2e07c81226d60435939618c91ec2ff0b75fbfa106eec3430f0fcf93a584bc6c73176676f532d78c3594fe28a54b36eb40b3d75593071a7ec91301533ace7
   languageName: node
   linkType: hard
 

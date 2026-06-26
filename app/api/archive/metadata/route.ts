@@ -1,19 +1,12 @@
 import { type NextRequest } from "next/server";
 
+import { getItemMetadata } from "@/service/archive";
+
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
-  const access = process.env.S3!;
-  const secret = process.env.S3_SECRET!;
-  const authHeader = `LOW ${access}:${secret}`;
 
   try {
-    const response = await fetch(`https://archive.org/metadata/${id}`, {
-      headers: {
-        Authorization: authHeader,
-      },
-      next: { revalidate: 3600 },
-    });
-    const data = await response.json();
+    const data = await getItemMetadata(id as string);
 
     return Response.json(data);
   } catch {

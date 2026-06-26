@@ -1,33 +1,8 @@
-"use client";
-import { useMemo, useCallback } from "react";
-import { sampleSize } from "lodash";
-import useSWR from "swr";
-import useSWRInfinite from "swr/infinite";
-import { Button } from "@heroui/button";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { searchItems, getItemMetadata, MovieData } from "@/service/archive";
 
-import { useUserStore } from "@/stores/user-store-provider";
-import { COMMON_WORDS } from "@/constants";
-import { fetcher, getItem, getItems } from "@/service/api";
-import { cleanHTML, processArrayOrString, pickBestThumbnail, ArchiveFile } from "@/utils";
-
-import Loading from "../layout/loading";
-import VideoCard from "../video/video-card";
-
-interface MovieData {
-  files: ArchiveFile[];
-  metadata: {
-    description: string;
-    title: string;
-    identifier: string;
-    creator?: string;
-    date?: string;
-    subject?: string[];
-    genre?: string[];
-    language?: string[];
-  };
-}
+import RecommendationsView, {
+  CategoryData,
+} from "./recommendations-view";
 
 interface RecommendationCategory {
   name: string;
@@ -36,23 +11,9 @@ interface RecommendationCategory {
   sort?: string;
 }
 
-interface CategoryData {
-  movies: MovieData[];
-  isLoading: boolean;
-  hasMore: boolean;
-  mutateItems: (id: string) => Promise<void>;
-}
-
-interface UserPreferences {
-  creators: Set<string>;
-  subjects: Set<string>;
-  genres: Set<string>;
-  languages: Set<string>;
-  years: Set<number>;
-  keywords: Set<string>;
-}
-
 const MOVIES_PER_CATEGORY = 4;
+// Over-fetch a small buffer so enough movies remain after client-side exclusion.
+const FETCH_ROWS = MOVIES_PER_CATEGORY * 2;
 
 const CATEGORIES: RecommendationCategory[] = [
   {
@@ -72,491 +33,45 @@ const CATEGORIES: RecommendationCategory[] = [
   },
 ];
 
-const extractKeywords = (text: string): string[] => {
-  return text
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((word) => word.length > 3 && !COMMON_WORDS.has(word))
-    .map((word) => word.replace(/[^\w]/g, ""));
-};
-
-const extractUserPreferences = (likedMovies: MovieData[]): UserPreferences => {
-  const validLikedMovies = likedMovies.filter(
-    (movie) => movie?.metadata?.identifier,
-  );
-
-  if (validLikedMovies.length === 0) {
-    return {
-      creators: new Set<string>(),
-      subjects: new Set<string>(),
-      genres: new Set<string>(),
-      languages: new Set<string>(),
-      years: new Set<number>(),
-      keywords: new Set<string>(),
-    };
-  }
-
-  const preferences: UserPreferences = {
-    creators: new Set(),
-    subjects: new Set(),
-    genres: new Set(),
-    languages: new Set(),
-    years: new Set(),
-    keywords: new Set(),
-  };
-
-  validLikedMovies.forEach((movie) => {
-    const { metadata } = movie;
-
-    if (metadata.creator) {
-      preferences.creators.add(metadata.creator.toLowerCase());
-    }
-
-    processArrayOrString(metadata.subject, (subject) => {
-      preferences.subjects.add(subject.toLowerCase());
-    });
-
-    if (metadata.genre && Array.isArray(metadata.genre)) {
-      metadata.genre.forEach((genre) =>
-        preferences.genres.add(genre.toLowerCase()),
-      );
-    }
-
-    processArrayOrString(metadata.language, (lang) => {
-      preferences.languages.add(lang.toLowerCase());
-    });
-
-    if (metadata.date) {
-      const year = parseInt(metadata.date.substring(0, 4));
-
-      if (!isNaN(year)) preferences.years.add(year);
-    }
-
-    const titleWords = extractKeywords(metadata.title);
-    const descWords = extractKeywords(metadata.description || "");
-
-    [...titleWords, ...descWords].forEach((word) => {
-      if (word) preferences.keywords.add(word);
-    });
-  });
-
-  return preferences;
-};
-
-const calculateMovieScore = (
-  movie: MovieData,
-  userPreferences: UserPreferences,
-  likes: string[],
-): number => {
-  let score = 0;
-  const metadata = movie.metadata;
-
-  if (likes.includes(metadata.identifier)) {
-    score += 100;
-  }
-
-  if (metadata.creator) {
-    const movieCreator = metadata.creator.toLowerCase();
-
-    userPreferences.creators.forEach((likedCreator) => {
-      if (
-        movieCreator.includes(likedCreator) ||
-        likedCreator.includes(movieCreator)
-      ) {
-        score += 80;
-      }
-    });
-  }
-
-  processArrayOrString(metadata.subject, (subject) => {
-    if (userPreferences.subjects.has(subject.toLowerCase())) {
-      score += 60;
-    }
-  });
-
-  if (metadata.genre && Array.isArray(metadata.genre)) {
-    metadata.genre.forEach((genre) => {
-      if (userPreferences.genres.has(genre.toLowerCase())) {
-        score += 50;
-      }
-    });
-  }
-
-  processArrayOrString(metadata.language, (lang) => {
-    if (userPreferences.languages.has(lang.toLowerCase())) {
-      score += 30;
-    }
-  });
-
-  if (metadata.date) {
-    const movieYear = parseInt(metadata.date.substring(0, 4));
-
-    if (!isNaN(movieYear)) {
-      userPreferences.years.forEach((likedYear) => {
-        const yearDiff = Math.abs(movieYear - likedYear);
-
-        if (yearDiff <= 5) score += 25;
-        else if (yearDiff <= 10) score += 15;
-        else if (yearDiff <= 20) score += 5;
-      });
-    }
-  }
-
-  const titleWords = extractKeywords(metadata.title);
-  const descWords = extractKeywords(metadata.description || "");
-
-  [...titleWords, ...descWords].forEach((word) => {
-    if (userPreferences.keywords.has(word)) {
-      score += 10;
-    }
-  });
-
-  return score;
-};
-
-const sortMoviesByScore = (
-  movies: MovieData[],
-  userPreferences: UserPreferences,
-  likes: string[],
-): MovieData[] => {
-  return [...movies]
-    .map((movie) => ({
-      movie,
-      score: calculateMovieScore(movie, userPreferences, likes),
-    }))
-    .sort((a, b) => b.score - a.score)
-    .map(({ movie }) => movie);
-};
-
-const findFeaturedMovie = (
-  categoryData: Record<string, CategoryData>,
-  userPreferences: UserPreferences,
-  likes: string[],
-): MovieData | null => {
-  const allMovies = Object.values(categoryData).flatMap((data) => data.movies);
-
-  if (allMovies.length === 0) return null;
-
-  const scoredMovies = allMovies
-    .map((movie) => ({
-      movie,
-      score: calculateMovieScore(movie, userPreferences, likes),
-    }))
-    .sort((a, b) => b.score - a.score);
-
-  if (scoredMovies[0].score > 0) {
-    return scoredMovies[0].movie;
-  }
-
-  return null;
-};
-
-const useCategoryData = (
+const fetchCategory = async (
   category: RecommendationCategory,
-  isActive: boolean,
-  excludeIds: string[],
-): CategoryData => {
-  const { data, isLoading } = useSWR<{
-    response: {
-      docs: { identifier: string }[];
-      numFound: number;
-    };
-  }>(
-    isActive
-      ? getItems(
-          {
-            collection: category.collection,
-            title: category.title,
-            excludeIds,
-          },
-          1,
-          {
-            sort: category.sort || "downloads desc",
-            rows: MOVIES_PER_CATEGORY.toString(),
-          },
-        )
-      : null,
-    fetcher,
-  );
-
-  const movieIds = useMemo(() => {
-    if (!data?.response?.docs) return [];
-
-    return data.response.docs.map(({ identifier }) => identifier);
-  }, [data]);
-
-  const {
-    data: movies = [],
-    isLoading: moviesLoading,
-    mutate: mutateItems,
-  } = useSWRInfinite<MovieData>(
-    (index) => (movieIds[index] && isActive ? getItem(movieIds[index]) : null),
-    fetcher,
+): Promise<CategoryData> => {
+  const search = await searchItems(
     {
-      initialSize: movieIds.length,
+      collection: category.collection,
+      title: category.title,
+    },
+    1,
+    {
+      sort: category.sort || "downloads desc",
+      rows: FETCH_ROWS.toString(),
     },
   );
 
-  const filteredMovies = useMemo(() => {
-    const validMovies = movies.filter((movie) => movie?.metadata?.identifier);
+  const ids = (search.response?.docs || []).map(
+    ({ identifier }) => identifier,
+  );
 
-    return validMovies.slice(0, MOVIES_PER_CATEGORY);
-  }, [movies]);
+  const movies: MovieData[] = await Promise.all(
+    ids.map((id) => getItemMetadata(id)),
+  );
 
   return {
-    movies: filteredMovies,
-    isLoading: isLoading || moviesLoading,
-    mutateItems: async (id: string) => {
-      mutateItems(
-        movies.filter((item) => item.metadata.identifier !== id),
-        { revalidate: false },
-      );
-    },
+    name: category.name,
+    movies,
     hasMore:
-      (data?.response?.numFound || 0) > (data?.response?.docs?.length || 0),
+      (search.response?.numFound || 0) > (search.response?.docs?.length || 0),
   };
 };
 
-const CategoryRow: React.FC<{
-  title: string;
-  categoryData: CategoryData;
-  userPreferences: UserPreferences;
-  likes: string[];
-  openPage: (name: string) => void;
-}> = ({ title, categoryData, userPreferences, likes, openPage }) => {
-  const { movies, isLoading, mutateItems } = categoryData;
-
-  const sortedMovies = useMemo(() => {
-    return sortMoviesByScore(movies, userPreferences, likes);
-  }, [movies, userPreferences, likes]);
-
-  const onNotInterested = useCallback(
-    (id: string) => {
-      mutateItems(id);
-    },
-    [mutateItems],
-  );
-
-  if (isLoading) {
-    return (
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">{title}</h2>
-        <div className="flex space-x-4 overflow-x-hidden">
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="w-64 h-44 rounded-lg animate-pulse flex-shrink-0"
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (movies.length === 0) return null;
+const HomeRecommendations = async () => {
+  const categories = await Promise.all(CATEGORIES.map(fetchCategory));
 
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-bold mb-4">{title}</h2>
-      <div className="relative">
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4">
-            {sortedMovies.map((movie) => (
-              <VideoCard
-                isLiked={false}
-                isWatched={false}
-                isNotInterested={false}
-                key={movie.metadata.identifier}
-                onNotInterested={onNotInterested}
-                movie={movie}
-                openPage={openPage}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const HomeRecommendations: React.FC = () => {
-  const router = useRouter();
-  const activeCategories = CATEGORIES.map((cat) => cat.name);
-
-  const likes = useUserStore((store) => store.likes);
-  const filter = useUserStore((store) => store.filter);
-  const watched = useUserStore((store) => store.watched);
-
-  const randomLikes = useMemo(() => {
-    return sampleSize(likes, Math.min(30, likes.length));
-  }, [likes]);
-
-  const { data: likedMovies = [], isLoading: likesLoading } =
-    useSWRInfinite<MovieData>(
-      (index) => (randomLikes[index] ? getItem(randomLikes[index]) : null),
-      fetcher,
-      {
-        initialSize: randomLikes.length,
-        revalidateFirstPage: false,
-      },
-    );
-
-  const userPreferences = useMemo(() => {
-    return extractUserPreferences(likedMovies);
-  }, [likedMovies]);
-
-  const excludeIds = useMemo(() => {
-    return Array.from(new Set([...filter, ...likes, ...watched]));
-  }, [filter, likes, watched]);
-
-  const popularData = useCategoryData(
-    CATEGORIES[0],
-    activeCategories.includes("Popular Classic Films"),
-    excludeIds,
-  );
-  const educationData = useCategoryData(
-    CATEGORIES[1],
-    activeCategories.includes("Educational Content"),
-    excludeIds,
-  );
-  const animationData = useCategoryData(
-    CATEGORIES[2],
-    activeCategories.includes("Animation Collection"),
-    excludeIds,
-  );
-
-  const categoryData = useMemo(
-    () => ({
-      "Popular Classic Films": popularData,
-      "Educational Content": educationData,
-      "Animation Collection": animationData,
-    }),
-    [popularData, educationData, animationData],
-  );
-
-  const openPage = useCallback(
-    (name: string) => {
-      router.push(`/${name}`);
-    },
-    [router],
-  );
-
-  const isAnyLoading = useMemo(
-    () =>
-      Object.values(categoryData).some((data) => data.isLoading) ||
-      likesLoading,
-    [categoryData, likesLoading],
-  );
-
-  const featuredMovie = findFeaturedMovie(categoryData, userPreferences, likes);
-
-  const thumbnailName = featuredMovie
-    ? pickBestThumbnail(featuredMovie.files)
-    : null;
-
-  if (isAnyLoading && !featuredMovie) {
-    return <Loading className="h-full" />;
-  }
-
-  return (
-    <div className="flex-grow w-full">
-      {featuredMovie && (
-        <div className="relative h-96 mb-8 overflow-hidden rounded-md">
-          {thumbnailName && (
-            <div className="absolute inset-0">
-              <Image
-                fill
-                priority
-                alt={featuredMovie.metadata.title}
-                className="object-cover object-center grayscale blur-sm"
-                sizes="100vw"
-                src={`https://archive.org/download/${featuredMovie.metadata.identifier}/${thumbnailName}`}
-                unoptimized
-              />
-            </div>
-          )}
-
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10" />
-
-          <div className="relative z-20 h-full flex items-center">
-            <div className="flex items-center gap-8 px-12 w-full">
-              {thumbnailName && (
-                <div className="flex-shrink-0 hidden sm:block">
-                  <div className="relative w-48 h-72 rounded-lg overflow-hidden shadow-2xl">
-                    <Image
-                      fill
-                      priority
-                      alt={featuredMovie.metadata.title}
-                      className="object-cover rounded-md"
-                      sizes="192px"
-                      src={`https://archive.org/download/${featuredMovie.metadata.identifier}/${thumbnailName}`}
-                      unoptimized
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="flex-1 max-w-2xl">
-                <h3 className="text-white text-4xl font-bold mb-4 leading-tight">
-                  {featuredMovie.metadata.title}
-                </h3>
-
-                <div className="flex items-center gap-4 mb-4 text-gray-300">
-                  {featuredMovie.metadata.date && (
-                    <span className="text-sm">
-                      {new Date(featuredMovie.metadata.date).getFullYear()}
-                    </span>
-                  )}
-                  {featuredMovie.metadata.creator && (
-                    <>
-                      <span className="text-sm">•</span>
-                      <span className="text-sm">
-                        {featuredMovie.metadata.creator}
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                <p
-                  className="text-gray-200 text-lg mb-6 line-clamp-3 leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html: cleanHTML(featuredMovie.metadata.description),
-                  }}
-                />
-
-                <div className="flex gap-4">
-                  <Button
-                    onPress={() => openPage(featuredMovie.metadata.identifier)}
-                    size="lg"
-                  >
-                    Watch
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div>
-        {CATEGORIES.map((category) => {
-          const data = categoryData[category.name as keyof typeof categoryData];
-
-          if (!data || !activeCategories.includes(category.name)) return null;
-
-          return (
-            <CategoryRow
-              key={category.name}
-              title={category.name}
-              categoryData={data}
-              userPreferences={userPreferences}
-              likes={likes}
-              openPage={openPage}
-            />
-          );
-        })}
-      </div>
-    </div>
+    <RecommendationsView
+      categories={categories}
+      moviesPerCategory={MOVIES_PER_CATEGORY}
+    />
   );
 };
 
